@@ -17,62 +17,95 @@ class MenuBackground:
         """Desenha o fundo na tela."""
         screen.blit(self.image, self.rect)
 class LoadingScreenToGame:
-    """Classe para a tela de carregamento do jogo.
-        Desenhará uma sequência de imagens de carregamento
-        durante um tempo, enquanto o áudio explicativo é reproduzido.
-        A tela de carregamento é exibida antes do início do jogo,
-        permitindo que o jogador veja que o jogo está sendo carregado.
-        O intervalo de exibição de cada imagem é específico, dessa maneira
-        cada imagem tera um tempo de exibição diferente.
+    """
+    Exibe uma sequência de imagens por durações específicas,
+    sincronizada com um áudio.
     """
 
-    def __init__(self, images, durations, audio_path):
+    def __init__(self, images, durations, audio_path=None):
         """
-        images: lista de caminhos para imagens de carregamento.
-        durations: lista de tempos de exibição (em segundos) para cada imagem.
-        audio_path: caminho para o arquivo de áudio explicativo.
+        Args:
+            images (list): Lista de nomes de arquivos de imagem (ex: ["load1.png", "load2.png"]).
+            durations (list): Lista de durações em segundos para cada imagem.
+            audio_path (str, optional): Caminho para o arquivo de áudio. Defaults to None.
         """
-        self.images = [pygame.transform.scale(pygame.image.load(img), (LARGURA_TELA, ALTURA_TELA)) for img in images]
+        # Carrega e escala as imagens para o tamanho da tela
+        self.images = [
+            pygame.transform.scale(
+                pygame.image.load(os.path.join(PASTA_IMAGENS, img)),
+                (LARGURA_TELA, ALTURA_TELA)
+            ) for img in images
+        ]
         self.durations = durations
+        
+        # O caminho do áudio está pronto para o futuro, mas pode ser None por enquanto
         self.audio_path = audio_path
-        self.current_index = 0
+
+        # Calcula a duração total da animação somando as durações individuais
+        self.total_duration = sum(self.durations)
+
+        # Variáveis de estado
+        self.current_image_index = 0
         self.start_time = None
-        self.finished = False
+        self.finished = True # Começa como finalizado, só fica ativo após chamar start()
 
     def start(self):
-        """Inicia a tela de carregamento e o áudio."""
-        self.current_index = 0
+        """Inicia ou reinicia a animação da tela de carregamento."""
+        print("Iniciando a tela de carregamento...")
         self.start_time = pygame.time.get_ticks()
+        self.current_image_index = 0
         self.finished = False
-        pygame.mixer.music.load(self.audio_path)
-        pygame.mixer.music.play()
+
+        # Lógica para tocar o áudio (pronta para o futuro)
+        if self.audio_path and os.path.exists(self.audio_path):
+            try:
+                pygame.mixer.music.load(self.audio_path)
+                # play() toca uma vez. play(-1) toca em loop. Usamos play() aqui.
+                pygame.mixer.music.play()
+            except pygame.error as e:
+                print(f"Não foi possível carregar o áudio: {e}")
+        else:
+            print("Áudio não fornecido ou não encontrado, rodando apenas com o tempo das imagens.")
+
 
     def update(self):
-        """Atualiza o índice da imagem de acordo com o tempo."""
+        """Atualiza a imagem a ser exibida com base no tempo decorrido."""
+        # Se a animação terminou ou não começou, não faz nada
         if self.finished or self.start_time is None:
             return
 
-        elapsed = (pygame.time.get_ticks() - self.start_time) / 1000  # segundos
-        total = 0
-        for i, duration in enumerate(self.durations):
-            total += duration
-            if elapsed < total:
-                self.current_index = i
-                break
-        else:
+        # Calcula o tempo que passou desde o início em segundos
+        elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
+
+        # Verifica se o tempo total da animação já passou
+        if elapsed_time >= self.total_duration:
             self.finished = True
-            pygame.mixer.music.stop()
+            pygame.mixer.music.stop() # Garante que a música pare
+            print("Tela de carregamento finalizada.")
+            return
+
+        # Lógica para descobrir qual imagem mostrar
+        cumulative_time = 0
+        for i, duration in enumerate(self.durations):
+            cumulative_time += duration
+            if elapsed_time < cumulative_time:
+                self.current_image_index = i
+                break # Encontrou a imagem correta, pode parar o loop
 
     def draw(self, screen):
-        """Desenha a imagem de carregamento atual."""
+        """Desenha a imagem de carregamento atual na tela."""
+        # Só desenha se a animação não tiver terminado
         if not self.finished and self.images:
-            screen.blit(self.images[self.current_index], (0, 0))
+            # Pega a imagem correta da lista
+            current_image = self.images[self.current_image_index]
+            # Desenha a imagem na tela
+            screen.blit(current_image, (0, 0))
 
 class GameBackground:
     """Classe para o fundo do jogo."""
     
     def __init__(self):
-        self.image = pygame.image.load("assets/images/gamebackground.png")
+        self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, "gamebackground.png"))
         self.image = pygame.transform.scale(self.image, (LARGURA_TELA, ALTURA_TELA))
         self.rect = self.image.get_rect()
 
@@ -80,40 +113,16 @@ class GameBackground:
         """Desenha o fundo na tela."""
         screen.blit(self.image, self.rect)
 
-class GameOverScreen:
-    """Classe para a tela de Game Over."""
-    
-    def __init__(self):
-        self.image = pygame.image.load("assets/images/gameover.png")
-        self.image = pygame.transform.scale(self.image, (LARGURA_TELA, ALTURA_TELA))
-        self.rect = self.image.get_rect()
-
-    def draw(self, screen):
-        """Desenha a tela de Game Over na tela."""
-        screen.blit(self.image, self.rect)
-
-class VictoryScreen:
-    """Classe para a tela de vitória."""
-    
-    def __init__(self):
-        self.image = pygame.image.load("assets/images/victory.png")
-        self.image = pygame.transform.scale(self.image, (LARGURA_TELA, ALTURA_TELA))
-        self.rect = self.image.get_rect()
-
-    def draw(self, screen):
-        """Desenha a tela de vitória na tela."""
-        screen.blit(self.image, self.rect)
-
-
 class EndScreen:
-    """Classe para a tela de fim de jogo."""
+    """Classe para a tela final do jogo."""
     
     def __init__(self):
-        self.image = os.path.join(PASTA_IMAGENS, "endscreen.png")
-        self.image = pygame.image.load(self.image)
+        self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, "endscreen.png"))
         self.image = pygame.transform.scale(self.image, (LARGURA_TELA, ALTURA_TELA))
         self.rect = self.image.get_rect()
 
     def draw(self, screen):
-        """Desenha a tela de fim de jogo na tela."""
+        """Desenha a tela final na tela."""
         screen.blit(self.image, self.rect)
+    
+
