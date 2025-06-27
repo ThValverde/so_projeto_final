@@ -1,7 +1,7 @@
 # game/entities.py
 # Define as classes que representam os "atores" do jogo, incluindo as threads.
 
-from ..settings import PASTA_IMAGENS, FONTE_PATH, VERDE_ESCURO, VERDE_CLARO
+from ..settings import PASTA_IMAGENS, FONTE_PATH, VERDE_ESCURO, VERDE_CLARO, FONTE_BOLD_PATH, VERMELHO
 import os
 import pygame
 import threading
@@ -275,12 +275,12 @@ class ContadorDePresentes(pygame.sprite.Sprite):
     def __init__(self, position, font_size=30):
         super().__init__()
         self.position = position # Posição do canto superior esquerdo do contador
-        self.font = pygame.font.Font(FONTE_PATH, font_size)
+        self.font = pygame.font.Font(FONTE_BOLD_PATH, font_size)
         self.count = 0
 
         # --- Carregamento e Configuração da Imagem do Ícone ---
         # Carrega a imagem original do ícone UMA VEZ e já redimensiona para 100x100
-        self.presente_original_img = pygame.image.load(os.path.join(PASTA_IMAGENS, "presente_visual4.png")).convert_alpha()
+        self.presente_original_img = pygame.image.load(os.path.join(PASTA_IMAGENS, "presente_visual_4.png")).convert_alpha()
         self.presente_original_img = pygame.transform.scale(self.presente_original_img, (100, 100))
         self.presente_original_size = self.presente_original_img.get_size()
         # Esta superfície guardará o ícone redimensionado a cada frame
@@ -305,7 +305,7 @@ class ContadorDePresentes(pygame.sprite.Sprite):
         superfície (self.image).
         """
         # Renderiza o texto
-        texto_surface = self.font.render(f"Presentes: {self.count}", True, VERDE_ESCURO)
+        texto_surface = self.font.render(f"Presentes: {self.count}", True, VERMELHO)
         texto_rect = texto_surface.get_rect()
 
         # Pega a imagem do presente já animada (pelo método update)
