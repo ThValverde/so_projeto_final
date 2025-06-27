@@ -20,40 +20,59 @@ class MainMenu:
     def draw(self, screen):
         """Desenha o menu na tela."""
         self.background.draw(screen)
+
+        # --- TÍTULO ---
         title_text = self.font_title.render("Jogo Nome", True, AMARELO)
-        title_rect = title_text.get_rect(center=(screen.get_width() // 2, 100))
-        # Crie o retângulo de fundo um pouco maior que o texto
-        title_box_rect = title_rect.inflate(20, 20) # Adiciona 20px de padding horizontal e vertical
-        pygame.draw.rect(screen, PRETO, title_box_rect, border_radius=5) # Desenha a caixa preta
+        title_rect = title_text.get_rect(center=(screen.get_width() // 2, 80))
+        title_box_rect = title_rect.inflate(20, 20)
         
-        # Desenha o subtítulo 1
+        # 1. Desenha a caixa preta de fundo
+        pygame.draw.rect(screen, PRETO, title_box_rect, border_radius=5)
+        # 2. (NOVO) Desenha a borda por cima da caixa preta
+        pygame.draw.rect(screen, VERDE_CLARO, title_box_rect, width=3, border_radius=5)
+        
+        # Desenha o texto do título
+        screen.blit(title_text, title_rect)
+
+        # --- SUBTÍTULO 1 ---
         subtitle_text = self.font_subtitle.render("SSC0640 - Sistemas Operacionais I", True, AMARELO)
         subtitle_rect = subtitle_text.get_rect(center=(screen.get_width() // 2, 150))
-        # Cria o retângulo de fundo para o subtítulo, um pouco maior que o texto
-        subtitle_box_rect = subtitle_rect.inflate(20, 20) # Adiciona padding
+        subtitle_box_rect = subtitle_rect.inflate(20, 20)
+        
+        # 1. Desenha a caixa preta
         pygame.draw.rect(screen, PRETO, subtitle_box_rect, border_radius=5)
+        # 2. (NOVO) Desenha a borda
+        pygame.draw.rect(screen, VERDE_CLARO, subtitle_box_rect, width=3, border_radius=5)
+        
         screen.blit(subtitle_text, subtitle_rect)
 
-        # Desenha o subtítulo 2
+        # --- SUBTÍTULO 2 ---
         subtitle2_text = self.font_subtitle.render("Prof. Dr. Rodolfo I. Meneguette", True, AMARELO)
-        subtitle2_rect = subtitle2_text.get_rect(center=(screen.get_width() // 2, 200)) 
-        # Cria o retângulo de fundo para o segundo subtítulo, um pouco maior que o texto
-        subtitle2_box_rect = subtitle2_rect.inflate(20, 20) # Adiciona padding
+        subtitle2_rect = subtitle2_text.get_rect(center=(screen.get_width() // 2, 210)) 
+        subtitle2_box_rect = subtitle2_rect.inflate(20, 20)
+        
+        # 1. Desenha a caixa preta
         pygame.draw.rect(screen, PRETO, subtitle2_box_rect, border_radius=5)
+        # 2. (NOVO) Desenha a borda
+        pygame.draw.rect(screen, VERDE_CLARO, subtitle2_box_rect, width=3, border_radius=5)
+        
         screen.blit(subtitle2_text, subtitle2_rect)
 
-        # Desenha o texto por cima da caixa
-        screen.blit(title_text, title_rect)
+
+        # --- OPÇÕES DO MENU ---
         for i, option in enumerate(self.options):
             color = AMARELO if i == self.selected_option else VERDE_ESCURO
             option_text = self.font.render(option, True, color)
-            option_rect = option_text.get_rect(center=(screen.get_width() // 2, 300 + i * 100)) 
-
-            # Cria o retângulo de fundo para a opção, um pouco maior que o texto
-            option_box_rect = option_rect.inflate(20, 20) # Adiciona padding
-
-            # 3. Desenha a caixa de fundo PRETA na tela ANTES do texto
+            option_rect = option_text.get_rect(center=(screen.get_width() // 2, 300 + i * 60)) 
+            option_box_rect = option_rect.inflate(20, 20)
+            
+            # 1. Desenha a caixa preta de fundo
             pygame.draw.rect(screen, PRETO, option_box_rect, border_radius=5)
 
-            screen.blit(option_text, option_rect)
+            # 2. (NOVO e com um toque especial) Desenha a borda por cima
+            # A cor da borda muda para AMARELO quando a opção está selecionada!
+            cor_borda = AMARELO if i == self.selected_option else VERDE_CLARO
+            pygame.draw.rect(screen, cor_borda, option_box_rect, width=3, border_radius=5)
 
+            # 3. Desenha o texto por cima de tudo
+            screen.blit(option_text, option_rect)
