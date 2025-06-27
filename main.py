@@ -1,37 +1,50 @@
 # main.py
-# Ponto de entrada da aplicação. Gerencia o fluxo entre as telas (estados).
 
-# Importa as classes das telas e a função principal do jogo
-from ui.menu import MenuPrincipal
-from ui.screens import TelaCarregamento, TelaFinal
-from game.main_game import loop_do_jogo
+# Imports que você já corrigiu
+from .settings import LARGURA_TELA, ALTURA_TELA, FPS
+from .ui.menu import MainMenu
+import pygame
 
+# Teste do menu principal
 def main():
-    """ Função principal que controla o estado do jogo. """
-    
-    # Dicionário para mapear estados a objetos/funções
-    telas = {
-        "MENU": MenuPrincipal(),
-        "LOADING": TelaCarregamento(),
-        "PLAYING": loop_do_jogo, # Note que aqui é a função, não uma instância
-        "FINAL_SCREEN": TelaFinal()
-    }
-    
-    estado_atual = "MENU"
-    
-    while estado_atual != "EXITING":
-        controlador = telas[estado_atual]
-        
-        # Se for uma classe (tem método 'run'), chama o método.
-        # Se for uma função (como loop_do_jogo), apenas a chama.
-        if hasattr(controlador, 'run'):
-            proximo_estado = controlador.run()
-        else:
-            proximo_estado = controlador()
-            
-        estado_atual = proximo_estado
+    # O import do pygame aqui dentro é redundante, mas não tem problema.
+    # Pode deixar ou remover.
+    import pygame 
+    from .settings import LARGURA_TELA, ALTURA_TELA, FPS
 
-    print("\nSaindo da Oficina do Noel. Feliz Natal!")
+    pygame.init()
+    screen = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+    pygame.display.set_caption("Menu Principal")
+    
+    clock = pygame.time.Clock()
+    menu = MainMenu()
 
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    menu.selected_option = (menu.selected_option - 1) % len(menu.options)
+                elif event.key == pygame.K_DOWN:
+                    menu.selected_option = (menu.selected_option + 1) % len(menu.options)
+                elif event.key == pygame.K_RETURN:
+                    if menu.selected_option == 0:
+                        print("Iniciar Jogo selecionado")
+                        # Aqui você mudaria o estado do jogo para "JOGANDO"
+                    elif menu.selected_option == 1:
+                        print("Readme selecionado")
+                    elif menu.selected_option == 2:
+                        running = False
+
+        screen.fill((0, 0, 0))  # Limpa a tela
+        menu.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+
+# PONTO DE ENTRADA DO PROGRAMA
 if __name__ == "__main__":
     main()
