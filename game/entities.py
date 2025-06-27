@@ -5,6 +5,7 @@ from ..settings import PASTA_IMAGENS, FONTE_PATH, VERDE_ESCURO, VERDE_CLARO
 import os
 import pygame
 import threading
+import random
 
 class Esteira(pygame.sprite.Sprite):
     """
@@ -27,8 +28,8 @@ class Esteira(pygame.sprite.Sprite):
         original_frame_2 = pygame.image.load(os.path.join(PASTA_IMAGENS, "esteira_frame_2.png")).convert_alpha()
         
         # Reescala as imagens para o novo tamanho fornecido
-        frame_1 = pygame.transform.scale(original_frame_1, size)
-        frame_2 = pygame.transform.scale(original_frame_2, size)
+        frame_1 = pygame.transform.scale(original_frame_1, size=(200, 200))
+        frame_2 = pygame.transform.scale(original_frame_2, size=(200, 200))
 
         # Armazena os frames já reescalados na lista
         self.frames = [frame_1, frame_2]
@@ -185,7 +186,82 @@ class GeradorPresentes(threading.Thread):
         self.running = False
         self.join()
 
-
 class MesaDePresentes(pygame.sprite.Sprite):
-    def __init__(self, position):
-        super().__init__(size)
+    def __init__(self, position, capacidade=3):
+        super().__init__()
+        TAMANHO_VISUAL_PRESENTE = (100, 100)
+        # --- CORREÇÃO 1: Sintaxe do os.path.join e nome da variável ---
+        # A variável foi padronizada para self.image_base
+        self.original_image = pygame.image.load(os.path.join(PASTA_IMAGENS, "mesadeembrulhos.png")).convert_alpha()
+        
+        self.image_base = pygame.transform.scale(self.original_image, size=(150, 80))
+
+        self.visuais_presentes = []
+        for i in range (1, 4):
+            # Carrega a imagem original do presente
+            original_img = pygame.image.load(os.path.join(PASTA_IMAGENS, f"presente_visual_{i}.png")).convert_alpha()
+            # Reescala a imagem para o novo tamanho
+            scaled_img = pygame.transform.scale(original_img, TAMANHO_VISUAL_PRESENTE)
+            # Adiciona a imagem já reescalada à lista
+            self.visuais_presentes.append(scaled_img)
+        self.capacidade = capacidade
+        self.itens_visuais = []
+
+        self.posicoes_slots = [(-5, -40), (35, -40), (75, -40)] # Ajuste essas posições se necessário
+
+        self.image = self.image_base.copy()
+        # --- CORREÇÃO 2: Typo em self.image ---
+        self.rect = self.image.get_rect(center = position)
+
+    def _redesenhar_superficie(self):
+        """
+        Método privado para atualizar a imagem da mesa com os presentes atuais.
+        É chamado sempre que um item é adicionado ou removido.
+        """
+        self.image = self.image_base.copy()
+
+        # --- CORREÇÃO AQUI ---
+        # Devemos iterar sobre os itens que ESTÃO na mesa (self.itens_visuais),
+        # e não sobre todas as aparências possíveis.
+        for i, presente_img in enumerate(self.itens_visuais):
+            # Garante que não tentemos acessar um slot que não existe
+            if i < len(self.posicoes_slots):
+                posicao_no_slot = self.posicoes_slots[i]
+                self.image.blit(presente_img, posicao_no_slot)
+
+    def adicionar_presente_visual(self):
+        """
+        Adiciona a aparência de um novo presente à mesa - se houver espaço
+        retorna True se sucesso
+        """
+        if len(self.itens_visuais) < self.capacidade:
+            novo_presente_img = random.choice(self.visuais_presentes)
+            self.itens_visuais.append(novo_presente_img)
+
+            self._redesenhar_superficie()
+            print(f"Visual de presente adicionado. Itens na mesa: {len(self.itens_visuais)}")
+            return True
+        else:
+            print("Visual da mesa já está cheio.")
+            return False
+
+    def remover_presente_visual(self):
+        """
+        Remove a aparência de um presente da mesa.
+        Retorna True se bem-sucedido, False caso contrário.
+        """
+        if self.itens_visuais:
+            self.itens_visuais.pop(0) 
+            
+            self._redesenhar_superficie()
+            print(f"Visual de presente removido. Itens na mesa: {len(self.itens_visuais)}")
+            return True
+        else:
+            print("Visual da mesa já está vazio.")
+            return False
+
+    def update(self):
+        """
+        O método update não precisa fazer nada ativamente.
+        """
+        pass

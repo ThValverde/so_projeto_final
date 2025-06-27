@@ -1,5 +1,5 @@
 # game/main_game.py
-# Contém a lógica principal e o loop do gameplay.
+# Contém a lógica principal do gameplay (versão para teste visual da MesaDePresentes).
 
 import pygame
 import sys
@@ -7,11 +7,13 @@ import sys
 # Importa as classes e configurações necessárias
 from ..settings import LARGURA_TELA, ALTURA_TELA, FPS
 from ..ui.screens import GameBackground
-from .entities import Esteira, Elfo # Importa ambas as entidades
+# (MODIFICADO) Importa apenas as entidades visuais que vamos usar
+from .entities import Esteira, Elfo, MesaDePresentes
+# from ..mechanics import Gerenciador Da Mesa DePresentes # (REMOVIDO) Não precisamos do gerenciador para este teste
 
 def game_loop(screen, clock):
     """
-    Função que contém o loop principal do jogo, com esteiras e o jogador.
+    Função que contém o loop principal do jogo para testar a parte VISUAL da MesaDePresentes.
 
     Args:
         screen (pygame.Surface): A superfície principal da tela do jogo.
@@ -21,34 +23,31 @@ def game_loop(screen, clock):
     background = GameBackground()
     all_sprites = pygame.sprite.Group()
 
-    # --- Configuração das Esteiras (com posicionamento horizontal) ---
-    y_pos_esteiras = (ALTURA_TELA / 2) - 80 # Posição Y, um pouco acima do centro
-    espacamento_horizontal = 160
-    largura_esteira = 200  # (NOVO) Define a largura como uma variável para reutilizar
+    # --- Configuração das Esteiras ---
+    # (O código das esteiras continua o mesmo)
+    y_pos_esteiras = (ALTURA_TELA / 2) - 80
+    espacamento_horizontal_esteiras = 180
+    largura_esteira = 200
     altura_esteira = 60
-
-    # Posição X da primeira esteira para centralizar o conjunto
-    x_pos_inicial = 100
-
-    esteira1 = Esteira(position=(x_pos_inicial, y_pos_esteiras), size=(largura_esteira, altura_esteira))
-    esteira2 = Esteira(position=(x_pos_inicial + espacamento_horizontal, y_pos_esteiras), size=(largura_esteira, altura_esteira))
-    esteira3 = Esteira(position=(x_pos_inicial + espacamento_horizontal * 2, y_pos_esteiras), size=(largura_esteira, altura_esteira))
+    x_pos_inicial_esteiras = (-60 + (LARGURA_TELA - (2 * espacamento_horizontal_esteiras) - largura_esteira) / 2)
+    esteira1 = Esteira(position=(x_pos_inicial_esteiras, y_pos_esteiras), size=(largura_esteira, altura_esteira))
+    esteira2 = Esteira(position=(x_pos_inicial_esteiras + espacamento_horizontal_esteiras, y_pos_esteiras), size=(largura_esteira, altura_esteira))
+    esteira3 = Esteira(position=(x_pos_inicial_esteiras + espacamento_horizontal_esteiras * 2, y_pos_esteiras), size=(largura_esteira, altura_esteira))
     all_sprites.add(esteira1, esteira2, esteira3)
 
-    # --- Configuração do Elfo (Jogador) ---
-    # A posição Y do Elfo, mais para baixo na tela
-    y_pos_elfo = ALTURA_TELA * 0.85
+    # --- Configuração da MesaDePresentes (Apenas a parte visual) ---
+    MesaDePresentes_sprite = MesaDePresentes(position=(x_pos_inicial_esteiras + espacamento_horizontal_esteiras*3 + 30, ALTURA_TELA * 0.8))
+    all_sprites.add(MesaDePresentes_sprite)
 
-    # (MODIFICADO) As posições X do Elfo agora são calculadas a partir do centro das esteiras
+    # --- Configuração do Elfo ---
+    y_pos_elfo = ALTURA_TELA * 0.85
     POSICOES_ELFO = [
-        (esteira1.rect.centerx, y_pos_elfo), # Posição abaixo do centro da esteira 1
-        (esteira2.rect.centerx, y_pos_elfo), # Posição abaixo do centro da esteira 2
-        (esteira3.rect.centerx, y_pos_elfo)  # Posição abaixo do centro da esteira 3
+        (esteira1.rect.centerx, y_pos_elfo),
+        (esteira2.rect.centerx, y_pos_elfo),
+        (esteira3.rect.centerx, y_pos_elfo),
+        (MesaDePresentes_sprite.rect.centerx, y_pos_elfo)
     ]
-    # O código original tinha 4 posições para o Elfo, mas apenas 3 esteiras.
-    # Ajustei para 3 posições para um alinhamento direto.
-    
-    player = Elfo(positions=POSICOES_ELFO, start_index=1)
+    player = Elfo(positions=POSICOES_ELFO, start_index=0)
     all_sprites.add(player)
 
     # --- Loop Principal do Jogo ---
@@ -62,13 +61,27 @@ def game_loop(screen, clock):
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False # Sai do loop do jogo para voltar ao menu
+                    running = False
                 
                 # Controle do Elfo
                 if event.key == pygame.K_a:
                     player.move("left")
                 elif event.key == pygame.K_d:
                     player.move("right")
+                
+                # --- (LÓGICA DE TESTE VISUAL) ---
+                # Se pressionar ESPAÇO e o Elfo estiver na posição da MesaDePresentes...
+                elif event.key == pygame.K_SPACE:
+                    if player.position_index == 3: # Índice da posição da MesaDePresentes
+                        print("Tecla ESPAÇO: Testando adicionar visual de presente...")
+                        # Chama o método diretamente na entidade visual
+                        MesaDePresentes_sprite.adicionar_presente_visual()
+                
+                # (NOVO) Se pressionar 'R', remove um presente visual para teste
+                elif event.key == pygame.K_r:
+                    print("Tecla R: Testando remover visual de presente...")
+                    # Chama o método diretamente na entidade visual
+                    MesaDePresentes_sprite.remover_presente_visual()
 
         # --- Lógica de Atualização ---
         all_sprites.update()
