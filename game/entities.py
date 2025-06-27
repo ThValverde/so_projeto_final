@@ -6,6 +6,7 @@ import os
 import pygame
 import threading
 import random
+import math
 
 class Esteira(pygame.sprite.Sprite):
     """
@@ -265,3 +266,81 @@ class MesaDePresentes(pygame.sprite.Sprite):
         O método update não precisa fazer nada ativamente.
         """
         pass
+    
+class ContadorDePresentes(pygame.sprite.Sprite):
+    """
+    Classe que representa um contador visual de presentes com um ícone animado.
+    O ícone do presente pulsa (aumenta e diminui de tamanho) suavemente.
+    """
+    def __init__(self, position, font_size=30):
+        super().__init__()
+        self.position = position # Posição do canto superior esquerdo do contador
+        self.font = pygame.font.Font(FONTE_PATH, font_size)
+        self.count = 0
+
+        # --- Carregamento e Configuração da Imagem do Ícone ---
+        # Carrega a imagem original do ícone UMA VEZ e já redimensiona para 100x100
+        self.presente_original_img = pygame.image.load(os.path.join(PASTA_IMAGENS, "presente_visual4.png")).convert_alpha()
+        self.presente_original_img = pygame.transform.scale(self.presente_original_img, (100, 100))
+        self.presente_original_size = self.presente_original_img.get_size()
+        # Esta superfície guardará o ícone redimensionado a cada frame
+        self.presente_animado_img = self.presente_original_img
+
+        # --- Parâmetros da Animação de Pulsar ---
+        self.pulse_speed = 3.0  # Quão rápido o ícone pulsa
+        self.pulse_amplitude = 0.1  # Quão "forte" é o pulso (0.1 = 10% de variação de tamanho)
+
+        # Chama o método para criar a imagem inicial do sprite
+        self._redesenhar_superficie()
+
+    def incrementar(self):
+        """Incrementa o contador de presentes e atualiza o texto."""
+        self.count += 1
+        # Apenas redesenha a superfície. O update cuidará da animação.
+        self._redesenhar_superficie()
+
+    def _redesenhar_superficie(self):
+        """
+        Método privado que combina o texto e o ícone do presente em uma única
+        superfície (self.image).
+        """
+        # Renderiza o texto
+        texto_surface = self.font.render(f"Presentes: {self.count}", True, VERDE_ESCURO)
+        texto_rect = texto_surface.get_rect()
+
+        # Pega a imagem do presente já animada (pelo método update)
+        presente_rect = self.presente_animado_img.get_rect()
+
+        # Calcula o tamanho da nova superfície combinada
+        padding = 10 # Espaço entre o texto e o ícone
+        total_width = texto_rect.width + padding + presente_rect.width
+        total_height = max(texto_rect.height, presente_rect.height)
+
+        # Cria a superfície final com fundo transparente
+        self.image = pygame.Surface((total_width, total_height), pygame.SRCALPHA)
+
+        # Desenha o texto e o ícone na nova superfície
+        self.image.blit(texto_surface, (0, (total_height - texto_rect.height) // 2))
+        self.image.blit(self.presente_animado_img, (texto_rect.width + padding, (total_height - presente_rect.height) // 2))
+
+        # Atualiza o retângulo principal do sprite
+        self.rect = self.image.get_rect(topleft=self.position)
+
+    def update(self):
+        """
+        Atualiza a animação do ícone do presente a cada frame.
+        """
+        # Calcula o fator de escala usando uma função seno para criar a pulsação
+        # pygame.time.get_ticks() retorna o tempo em milissegundos
+        tempo = pygame.time.get_ticks() / 1000.0  # Converte para segundos
+        scale_factor = 1.0 + math.sin(tempo * self.pulse_speed) * self.pulse_amplitude
+
+        # Calcula as novas dimensões do ícone
+        novo_width = int(self.presente_original_size[0] * scale_factor)
+        novo_height = int(self.presente_original_size[1] * scale_factor)
+
+        # Redimensiona a imagem original (importante para não perder qualidade)
+        self.presente_animado_img = pygame.transform.scale(self.presente_original_img, (novo_width, novo_height))
+
+        # Chama o método para redesenhar a superfície combinada com o ícone no novo tamanho
+        self._redesenhar_superficie()
