@@ -1,0 +1,127 @@
+# Planejamento de Jogo Revisado: "Oficina do Noel: Operação Sincronizada"
+
+# 1. Conceito Principal e Objetivo Didático
+
+#     Conceito: Um jogo de arcade de gerenciamento. O jogador controla um duende que deve coletar presentes (threads) que caem de esteiras e levá-los a uma mesa de embrulho com capacidade limitada. A dificuldade aumenta com a velocidade e quantidade de presentes, forçando o jogador a gerenciar tanto a coleta quanto o acesso ao recurso limitado.
+
+#     Objetivo Didático: Demonstrar visualmente e de forma interativa os conceitos de threads, produtor-consumidor, o papel do escalonador, e o uso de semáforos para controlar o acesso a recursos compartilhados, conforme solicitado para o trabalho. O jogo e o vídeo explicativo constituem o material didático a ser desenvolvido.
+
+# 2. Estrutura e Fluxo do Jogo
+
+# A estrutura de telas e a sequência de áudios são mantidas para garantir uma experiência de usuário coesa:
+
+#     Tela Inicial: Título "Oficina do Noel", nomes do grupo, com botões 
+
+#     Iniciar, Sobre, Sair.
+
+#     Tela "Sobre": Breve explicação do contexto acadêmico do projeto.
+
+#     Sequência de Introdução:
+
+#         "Carregamento" com Áudio 1 (Voz do Papai Noel): Introdução lúdica aos conceitos gerais de Sistemas Operacionais.
+
+#         Transição para o Jogo com Áudio 2 (Voz do Papai Noel): Apresentação da analogia da oficina, das threads (presentes) e do novo desafio: a mesa de embrulho.
+
+#     Tela Principal (Gameplay): Onde o jogo acontece.
+
+#     Tela Final: Pontuação, áudio de encerramento resumindo todos os conceitos aprendidos (threads, escalonador e semáforos) e agradecimentos.
+
+# 3. Mecânicas de Jogo e a Analogia Refinada com SO
+
+# Esta é a parte central do projeto, agora com todos os elementos necessários.
+
+# Elemento do Jogo
+	
+
+# Análogo em Sistemas Operacionais
+	
+
+# Detalhes da Mecânica e Explicação
+
+# As 3 Esteiras
+	
+
+# Produtores de Threads (Producers)
+	
+
+# Fontes independentes que criam continuamente as unidades de trabalho (os presentes) a serem processadas.
+
+# Cada Presente Caindo
+	
+
+# Thread
+	
+
+# Cada presente é uma "thread" individual, uma tarefa que precisa ser executada pelo sistema.
+
+# O Jogador (Tomando Decisões)
+	
+
+# Escalonador de Threads (Scheduler)
+	
+
+# Ao decidir qual presente pegar primeiro, o jogador está agindo como um escalonador, escolhendo qual thread tem maior prioridade para evitar um erro (deixar o presente cair).
+
+# O Duende (Controlado pelo Jogador)
+	
+
+# CPU / "Worker Thread"
+	
+
+# O duende é o trabalhador que executa a tarefa. Ele é o recurso que o escalonador (jogador) aloca para processar a thread (presente) selecionada.
+
+# A "Mesa de Embrulho" (com 3 vagas)
+	
+
+# Recurso Compartilhado
+	
+
+# É um recurso finito (como um pool de conexões de banco de dados, ou acesso a um arquivo) que múltiplas operações precisam usar, mas que não pode ser usado por todos ao mesmo tempo.
+
+# As Vagas na Mesa
+	
+
+# Semáforo Contador
+	
+
+# Este é o semáforo. Ele controla o acesso à mesa. Mecânica: O semáforo inicia com valor 3. Ao colocar um presente na mesa, o contador diminui (operação wait ou P). Se o contador for 0 (mesa cheia), o duende não pode depositar um novo presente e fica "bloqueado" para essa ação.
+
+# Duendes Auxiliares (NPCs)
+	
+
+# Threads Consumidoras Secundárias
+	
+
+# Pequenos duendes (controlados pelo computador) pegam os presentes da mesa em um ritmo próprio para levá-los ao trenó. Ao pegar um presente, eles liberam uma vaga, e o contador do semáforo aumenta (operação signal ou V), desbloqueando o acesso para o jogador.
+
+# Perder um Presente
+	
+
+# Erro / Thread Não Tratada
+	
+
+# Representa uma falha no escalonamento. Uma thread não foi processada a tempo, causando um erro que afeta a estabilidade do sistema (barra de vida).
+
+# 4. Sequência de Áudios Didáticos (Voz do Papai Noel)
+
+# A narração é fundamental para conectar a jogabilidade aos conceitos teóricos.
+
+#     Ao iniciar o jogo: "Ho ho ho! Bem-vindo à minha oficina! Cada presente que cai é um thread! Sua missão, como um bom escalonador, é decidir qual pegar primeiro!"
+
+#     Ao introduzir a mesa: "Depois de pegar um presente, leve-o para a mesa de embrulho! Mas atenção: ela só tem 3 vagas! A mesa é um recurso compartilhado, e as vagas são o nosso semáforo, que controla quem pode usá-la!"
+
+#     Quando o jogador tenta usar a mesa cheia: "Oh, não! A mesa está cheia! O nosso semáforo está em zero e bloqueou o acesso. Você precisa esperar um ajudante liberar um espaço. Viu só? É assim que um semáforo evita a sobrecarga de um recurso!"
+
+#     Quando uma vaga é liberada: "Ótimo! Um dos ajudantes liberou um espaço! O semáforo sinalizou que você já pode usar a mesa novamente. Mantenha o fluxo funcionando!"
+
+#     Áudio Final: "Parabéns! Você agiu como um verdadeiro Sistema Operacional! Você, o escalonador, decidiu quais threads (presentes) processar e usou o semáforo (as vagas na mesa) para gerenciar o acesso ao recurso compartilhado. É exatamente assim que seu computador organiza tarefas complexas! Feliz Natal!"
+
+# 5. Alinhamento com os Requisitos do Trabalho
+
+# Este planejamento revisado agora cumpre todas as especificações do projeto:
+
+#     Threads e Semáforos: Os conceitos são os pilares da mecânica do jogo, representados pelos presentes e pela mesa de embrulho, respectivamente.
+
+# Material Didático e Vídeo: O jogo é o material didático , e a narração do Papai Noel serve como roteiro para o vídeo explicativo, que também deverá mostrar os pontos do código onde as threads e os semáforos foram implementados.
+
+# Relatório e Avaliação: A tabela de analogias fornece uma base sólida para o relatório descritivo e para a documentação do sistema. O conceito lúdico facilita a avaliação pelo público externo.
