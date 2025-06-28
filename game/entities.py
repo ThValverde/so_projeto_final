@@ -147,12 +147,20 @@ class Presente(pygame.sprite.Sprite):
         self.esteira = esteira
         self.fall_speed = fall_speed
 
-        # Carrega a imagem do presente
-        self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, "presente.png")).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (50, 50))  # Ajuste o tamanho conforme necessário
+        tipos_presente = ["presente_visual_1.png", "presente_visual_2.png", "presente_visual_3.png", "presente_visual_4.png"]
+        tipo_escolhido = random.choice(tipos_presente)
+        
+        try:
+            self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, tipo_escolhido)).convert_alpha()
+        except:
+            # Fallback se a imagem não existir
+            self.image = pygame.Surface((80, 80))
+            self.image.fill((255, 0, 0))  # Vermelho como fallback
+            
+        self.image = pygame.transform.scale(self.image, (80, 80))  # Tamanho maior para melhor visibilidade
 
         # Define o retângulo do sprite e posiciona acima da esteira
-        self.rect = self.image.get_rect(center=(self.esteira.rect.centerx, self.esteira.rect.top - 50))
+        self.rect = self.image.get_rect(center=(self.esteira.rect.centerx, self.esteira.rect.top+30))
 
     def update(self):
         """Atualiza a posição do presente, fazendo-o cair."""
@@ -161,6 +169,7 @@ class Presente(pygame.sprite.Sprite):
         # Se o presente sair da tela, remove-o do grupo de sprites
         if self.rect.top > pygame.display.get_surface().get_height():
             self.kill()
+
 
 class GeradorPresentes(threading.Thread):
     """
@@ -187,6 +196,7 @@ class GeradorPresentes(threading.Thread):
         self.running = False
         self.join()
 
+
 class MesaDePresentes(pygame.sprite.Sprite):
     def __init__(self, position, capacidade=3):
         super().__init__()
@@ -198,15 +208,33 @@ class MesaDePresentes(pygame.sprite.Sprite):
         self.image_base = pygame.transform.scale(self.original_image, size=(150, 80))
 
         self.visuais_presentes = []
-        for i in range (1, 4):
-            # Carrega a imagem original do presente
-            original_img = pygame.image.load(os.path.join(PASTA_IMAGENS, f"presente_visual_{i}.png")).convert_alpha()
-            # Reescala a imagem para o novo tamanho
-            scaled_img = pygame.transform.scale(original_img, TAMANHO_VISUAL_PRESENTE)
-            # Adiciona a imagem já reescalada à lista
-            self.visuais_presentes.append(scaled_img)
+        # Usa presente_visual_1.png até presente_visual_4.png na mesa
+        tipos_presente = ["presente_visual_1.png", "presente_visual_2.png", "presente_visual_3.png", "presente_visual_4.png"]
+        for tipo in tipos_presente:
+            try:
+                # Carrega a imagem original do presente
+                original_img = pygame.image.load(os.path.join(PASTA_IMAGENS, tipo)).convert_alpha()
+                # Reescala a imagem para o novo tamanho
+                scaled_img = pygame.transform.scale(original_img, TAMANHO_VISUAL_PRESENTE)
+                # Adiciona a imagem já reescalada à lista
+                self.visuais_presentes.append(scaled_img)
+            except:
+                # Fallback se a imagem não existir
+                fallback_img = pygame.Surface(TAMANHO_VISUAL_PRESENTE)
+                fallback_img.fill((255, 0, 0))  # Vermelho como fallback
+                self.visuais_presentes.append(fallback_img)
         self.capacidade = capacidade
         self.itens_visuais = []
+        
+        # --- Variáveis para Processamento Automático ---
+        self.processamento_ativo = True  # Se a mesa deve processar automaticamente
+        self.tempo_processamento = 2000  # Tempo em ms para processar um presente (2 segundos para teste)
+        self.ultimo_processamento = 0  # Inicializa com 0 para começar imediatamente
+        self.presentes_processados_total = 0
+        
+        # --- Estado visual do processamento ---
+        self.processando = False
+        self.tempo_inicio_processamento = 0
 
         self.posicoes_slots = [(-5, -40), (35, -40), (75, -40)] # Ajuste essas posições se necessário
 
@@ -221,14 +249,28 @@ class MesaDePresentes(pygame.sprite.Sprite):
         """
         self.image = self.image_base.copy()
 
-        # --- CORREÇÃO AQUI ---
-        # Devemos iterar sobre os itens que ESTÃO na mesa (self.itens_visuais),
-        # e não sobre todas as aparências possíveis.
+        # Desenha os presentes na mesa
         for i, presente_img in enumerate(self.itens_visuais):
             # Garante que não tentemos acessar um slot que não existe
             if i < len(self.posicoes_slots):
                 posicao_no_slot = self.posicoes_slots[i]
-                self.image.blit(presente_img, posicao_no_slot)
+                
+                # Se está processando e é o primeiro presente, adiciona efeito visual
+                if self.processando and i == 0:
+                    # Cria uma cópia da imagem do presente com transparência
+                    presente_processando = presente_img.copy()
+                    presente_processando.set_alpha(150)  # Torna semi-transparente
+                    self.image.blit(presente_processando, posicao_no_slot)
+                    
+                    # Adiciona um pequeno texto indicando processamento
+                    try:
+                        font_pequena = pygame.font.Font(None, 16)
+                        texto_proc = font_pequena.render("PROC", True, (255, 255, 0))  # Amarelo
+                        self.image.blit(texto_proc, (posicao_no_slot[0] + 10, posicao_no_slot[1] - 15))
+                    except:
+                        pass  # Se não conseguir carregar fonte, ignora o texto
+                else:
+                    self.image.blit(presente_img, posicao_no_slot)
 
     def adicionar_presente_visual(self):
         """
@@ -261,12 +303,109 @@ class MesaDePresentes(pygame.sprite.Sprite):
             print("Visual da mesa já está vazio.")
             return False
 
+    def processar_presente(self):
+        """
+        Processa (remove) um presente da mesa, simulando o trabalho de embrulho.
+        Retorna True se processou um presente, False se mesa vazia.
+        """
+        if self.itens_visuais and not self.processando:
+            self.processando = True
+            self.tempo_inicio_processamento = pygame.time.get_ticks()
+            print(f"[MESA] Iniciando processamento de presente...")
+            return True
+        return False
+    
+    def finalizar_processamento(self):
+        """
+        Finaliza o processamento de um presente (chamado após o tempo de processamento).
+        """
+        if self.processando and self.itens_visuais:
+            self.itens_visuais.pop(0)  # Remove o primeiro presente (FIFO)
+            self.presentes_processados_total += 1
+            self.processando = False
+            self._redesenhar_superficie()  # Sempre redesenha após remover
+            print(f"[MESA] Presente processado! Restam: {len(self.itens_visuais)}, Total processados: {self.presentes_processados_total}")
+            return True
+        elif self.processando and not self.itens_visuais:
+            # Se estava processando mas não há mais presentes, para o processamento
+            self.processando = False
+            self._redesenhar_superficie()
+            print("[MESA] Processamento cancelado - mesa vazia")
+        return False
+    
+    def esta_cheia(self):
+        """Verifica se a mesa está cheia."""
+        return len(self.itens_visuais) >= self.capacidade
+    
+    def esta_vazia(self):
+        """Verifica se a mesa está vazia."""
+        return len(self.itens_visuais) == 0
+    
+    def get_ocupacao(self):
+        """Retorna a ocupação atual da mesa."""
+        return len(self.itens_visuais)
+    
+    def ativar_processamento_automatico(self):
+        """Ativa o processamento automático da mesa."""
+        self.processamento_ativo = True
+        print("[MESA] Processamento automático ativado!")
+    
+    def desativar_processamento_automatico(self):
+        """Desativa o processamento automático da mesa."""
+        self.processamento_ativo = False
+        print("[MESA] Processamento automático desativado!")
+    
+    def ajustar_velocidade_processamento(self, novo_tempo_ms):
+        """Ajusta a velocidade de processamento da mesa."""
+        self.tempo_processamento = max(500, novo_tempo_ms)  # Mínimo de 0.5 segundos
+        print(f"[MESA] Velocidade de processamento ajustada para {self.tempo_processamento}ms")
+
     def update(self):
         """
-        O método update não precisa fazer nada ativamente.
+        Atualiza a mesa, incluindo processamento automático se ativado.
         """
-        pass
+        current_time = pygame.time.get_ticks()
+        
+        # Se está processando, verifica se terminou
+        if self.processando:
+            tempo_decorrido = current_time - self.tempo_inicio_processamento
+            if tempo_decorrido >= self.tempo_processamento:
+                self.finalizar_processamento()
+                # Atualiza o timestamp do último processamento
+                self.ultimo_processamento = current_time
+        
+        # Se processamento automático está ativo e há presentes para processar
+        elif (self.processamento_ativo and 
+              len(self.itens_visuais) > 0 and 
+              not self.processando):
+            
+            # Verifica se já passou tempo suficiente desde o último processamento
+            tempo_desde_ultimo = current_time - self.ultimo_processamento
+            if tempo_desde_ultimo >= self.tempo_processamento:
+                if self.processar_presente():
+                    # Note: ultimo_processamento será atualizado quando o processamento terminar
+                    pass
+            
+        # Se não há presentes na mesa, reseta o timer
+        elif len(self.itens_visuais) == 0:
+            self.ultimo_processamento = current_time
     
+    def debug_status(self):
+        """Retorna informações de debug sobre o estado da mesa."""
+        current_time = pygame.time.get_ticks()
+        return {
+            'presentes_na_mesa': len(self.itens_visuais),
+            'processamento_ativo': self.processamento_ativo,
+            'processando': self.processando,
+            'tempo_desde_ultimo': current_time - self.ultimo_processamento,
+            'tempo_processamento': self.tempo_processamento,
+            'pode_processar': (self.processamento_ativo and 
+                              len(self.itens_visuais) > 0 and 
+                              not self.processando and
+                              (current_time - self.ultimo_processamento) >= self.tempo_processamento)
+        }
+
+
 class ContadorDePresentes(pygame.sprite.Sprite):
     """
     Classe que representa um contador visual de presentes com um ícone animado.

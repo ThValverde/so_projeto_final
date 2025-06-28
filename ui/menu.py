@@ -22,7 +22,7 @@ class MainMenu:
         self.background.draw(screen)
 
         # --- TÍTULO ---
-        title_text = self.font_title.render("Jogo Nome", True, BRANCO)
+        title_text = self.font_title.render("Oficina do Noel", True, BRANCO)
         title_rect = title_text.get_rect(center=(screen.get_width() // 2, 80))
         title_box_rect = title_rect.inflate(20, 20)
         
