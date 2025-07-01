@@ -96,7 +96,7 @@ class Elfo(pygame.sprite.Sprite):
         # Usar 'center' ajuda a posicionar o sprite pelo seu centro
         self.rect = self.image.get_rect(center=self.positions[self.position_index])
 
-        self.capacidade_carga = 4
+        self.capacidade_carga = 10
         self.presentes_carregados = 0
         self.font_carga = pygame.font.Font(FONTE_BOLD_PATH, 20)
         self.texto_carga = None
@@ -139,10 +139,10 @@ class Elfo(pygame.sprite.Sprite):
     def _atualizar_texto_carga(self):
         """Atualiza a superfície do texto que indica a quantidade de carga."""
         cor_texto = (0, 200, 0) # Verde para vazio/pouco carregado
-        if self.presentes_carregados >= self.capacidade_carga * 0.75:
-            cor_texto = (255, 255, 0) # Amarelo para quase cheio
-        elif self.presentes_carregados == self.capacidade_carga:
+        if self.presentes_carregados == self.capacidade_carga:
             cor_texto = (255, 0, 0)   # Vermelho para cheio
+        elif self.presentes_carregados >= self.capacidade_carga * 0.75:
+            cor_texto = (255, 255, 0) # Amarelo para quase cheio
 
         texto = f"{self.presentes_carregados}"
         self.texto_carga = self.font_carga.render(texto, True, cor_texto)
