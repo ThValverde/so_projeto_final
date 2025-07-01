@@ -178,7 +178,7 @@ def game_loop(screen, clock):
         all_sprites.update()
         if mesa_sprite.verificar_processamento_concluido():
             # 1. Tenta remover o item da LÓGICA DE CONTROLE (libera o semáforo)
-            if game_mechanics.elfo_tentar_coletar():
+            if game_mechanics.elfo_tentar_coletar(player):
                 # 2. Se a lógica foi bem-sucedida, remove o item VISUAL
                 mesa_sprite.finalizar_processamento_visual()
                 
@@ -190,7 +190,13 @@ def game_loop(screen, clock):
                 # Apenas finaliza o estado visual.
                 mesa_sprite.finalizar_processamento_visual()
                 print("[AVISO] Sincronia corrigida: item visual removido sem contrapartida lógica.")
-
+        if game_mechanics.verificar_derrota():
+            print("="*30)
+            print("FIM DE JOGO! Muitos presentes foram perdidos.")
+            print(f"Pontuação Final: {game_mechanics.pontuacao}")
+            print(f"Presentes Perdidos: {game_mechanics.presentes_perdidos}")
+            print("="*30)
+            running = False # Termina o loop do jogo
         # Remove presentes que saíram da tela
         # for presente in presentes_sprites:
         #     if presente.rect.top > ALTURA_TELA:

@@ -158,8 +158,13 @@ class Elfo(pygame.sprite.Sprite):
             pos_y = self.rect.top - self.texto_carga.get_height() - 5
             surface.blit(self.texto_carga, (pos_x, pos_y))
 
+    def aumentar_capacidade(self, aumento):
+        """Aumenta a capacidade de carga do elfo."""
+        self.capacidade_carga += aumento
+        print(f"[LEVEL UP] Capacidade do elfo aumentada para: {self.capacidade_carga}")
+        
     def update(self):
-        # ... (seu código de update atual) ...
+        """Atualiza o Elfo, incluindo a animação do texto de carga."""
         self._atualizar_texto_carga() # Garante que o texto seja atualizado a cada frame
 
     def draw(self, surface):

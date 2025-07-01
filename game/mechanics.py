@@ -145,43 +145,28 @@ class EscalonadorJogo:
     e o balanceamento entre produtores.
     """
     
-    def __init__(self, produtores, intervalo_escalonamento=10.0):
+    def __init__(self, produtores):
         self.produtores = produtores
-        self.intervalo_escalonamento = intervalo_escalonamento
         self.running = True
         self.nivel_dificuldade = 1
-        self.thread_escalonador = threading.Thread(target=self._loop_escalonamento)
-        self.thread_escalonador.daemon = True
+        # self.thread_escalonador.daemon = True
         
     def iniciar(self):
         """Inicia o escalonador."""
-        self.thread_escalonador.start()
+        # self.thread_escalonador.start()
         print("[ESCALONADOR] Iniciado!")
         
-    def _loop_escalonamento(self):
-        """Loop principal do escalonador."""
-        while self.running:
-            try:
-                time.sleep(self.intervalo_escalonamento)
-                if self.running:
-                    self._ajustar_dificuldade()
-            except Exception as e:
-                print(f"[ERRO] Escalonador: {e}")
-                break
-    
-    def _ajustar_dificuldade(self):
+    def aumentar_nivel(self):
         """Ajusta a dificuldade do jogo aumentando velocidade de produção."""
         self.nivel_dificuldade += 1
         
-        # Acelera todos os produtores
         for produtor in self.produtores:
             if produtor.is_alive():
-                produtor.acelerar_producao(0.85)  # Cada nível fica 15% mais rápido
+                produtor.acelerar_producao(0.9) # Fica 10% mais rápido
         
-        print(f"[ESCALONADOR] Nível {self.nivel_dificuldade} - Dificuldade aumentada!")
+        print(f"[ESCALONADOR] Nível {self.nivel_dificuldade} alcançado! Dificuldade aumentada!")
     
     def parar(self):
-        """Para o escalonador."""
         self.running = False
 
 class GameMechanics:
@@ -206,6 +191,7 @@ class GameMechanics:
         self.pontuacao = 0
         self.presentes_perdidos = 0
         self.iniciado = False
+        self.nivel_objetivo = 100 # para o próximo nível de dificuldade
         
     def iniciar_sistema(self):
         """Inicia todas as threads e o sistema de mecânicas."""
@@ -217,7 +203,7 @@ class GameMechanics:
                 produtor.start()
             
             # Inicia escalonador
-            self.escalonador.iniciar()
+            # self.escalonador.iniciar()
             
             self.iniciado = True
             print("[SISTEMA] Todas as mecânicas iniciadas!")
@@ -232,10 +218,30 @@ class GameMechanics:
                 produtor.parar()
             
             # Para escalonador
-            self.escalonador.parar()
+            # self.escalonador.parar()
             
             self.iniciado = False
             print("[SISTEMA] Sistema parado!")
+    # (NOVO) Método para verificar e aplicar o level up
+    def verificar_levelup(self, elfo):
+        if self.pontuacao >= self.nivel_objetivo:
+            self.escalonador.aumentar_nivel()
+            elfo.aumentar_capacidade(10)
+            # Define o próximo objetivo de pontuação
+            self.nivel_objetivo += 100
+
+    # (NOVO) Método para verificar a condição de derrota
+    def verificar_derrota(self):
+        # Evita a derrota no início do jogo quando a pontuação é 0
+        if self.pontuacao <= 0:
+            return False
+        
+        penalidade_total = self.presentes_perdidos * 10
+        limite_derrota = self.pontuacao * 2
+        
+        if penalidade_total >= limite_derrota:
+            return True
+        return False
     
     def processar_novos_presentes(self):
         """
@@ -254,18 +260,18 @@ class GameMechanics:
         
         return presentes_processados
     
-    def elfo_tentar_coletar(self):
+    def elfo_tentar_coletar(self, elfo):
         """
         Simula o processamento de um presente da mesa.
         Retorna True e incrementa a pontuação se a mesa não estava vazia.
         """
-        # (LÓGICA CORRIGIDA)
         # Primeiro, verificamos se a mesa lógica tem algum item para ser processado.
         if not self.gerenciador_mesa.esta_vazia():
             # Se não está vazia, removemos o item (não importa qual seja).
             self.gerenciador_mesa.remover_presente()
             # E então, garantidamente, adicionamos a pontuação.
             self.pontuacao += 10
+            self.verificar_levelup(elfo)
             return True
         # Se a mesa já estava vazia, não faz nada.
         return False
