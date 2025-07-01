@@ -148,6 +148,15 @@ class Elfo(pygame.sprite.Sprite):
         self.texto_carga = self.font_carga.render(texto, True, cor_texto)
         self.posicao_texto_carga = (self.rect.centerx - self.texto_carga.get_width() // 2,
                                     self.rect.top - self.texto_carga.get_height() - 5)
+    def desenhar_carga(self, surface):
+        """Desenha o indicador de carga sobre a cabeça do elfo."""
+        # A verificação 'if self.texto_carga ...' já garante que nada é desenhado se não houver texto
+        if self.presentes_carregados > 0 and self.texto_carga is not None:
+            # Posição do texto é recalculada em _atualizar_texto_carga, que é chamado no update.
+            # Apenas desenhamos aqui.
+            pos_x = self.rect.centerx - self.texto_carga.get_width() // 2
+            pos_y = self.rect.top - self.texto_carga.get_height() - 5
+            surface.blit(self.texto_carga, (pos_x, pos_y))
 
     def update(self):
         # ... (seu código de update atual) ...

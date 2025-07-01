@@ -59,8 +59,8 @@ def game_loop(screen, clock):
     all_sprites.add(player)
     
     # --- Variáveis de Controle do Jogo ---
-    elfo_carregando_presente = False
-    presente_carregado = None
+    #elfo_carregando_presente = False
+    #presente_carregado = None
     debug_mode = False  # Para mostrar informações de debug
     
     # --- Configuração de Fonte para UI ---
@@ -100,31 +100,38 @@ def game_loop(screen, clock):
 
                 # Ação principal - coletar/entregar presente
                 elif event.key == pygame.K_SPACE:
-                    if not elfo_carregando_presente and player.presentes_carregados < player.capacidade_carga:
-                        # Tentar coletar presente
-                        if player.position_index < 3:  # Está em uma esteira
+                    # Se o jogador está na posição da mesa
+                    if player.position_index == 3:
+                        # Tenta entregar um presente se tiver algum
+                        if player.presentes_carregados > 0:
+                            if game_mechanics.adicionar_presente_mesa(None):
+                                mesa_sprite.adicionar_presente_visual()
+                                player.descarregar_presente() # Descarrega um
+                                print(f"Presente entregue! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
+                            else:
+                                print("Mesa cheia! Elfo BLOQUEADO.")
+                    
+                    # Se o jogador está em uma das esteiras
+                    elif player.position_index < 3:
+                        # Tenta coletar um presente se não estiver com carga máxima
+                        if player.presentes_carregados < player.capacidade_carga:
                             esteira_atual = esteiras[player.position_index]
                             for presente in presentes_sprites:
+                                # Condição de proximidade para coletar
                                 if (abs(presente.rect.centerx - player.rect.centerx) < 50 and
                                     presente.rect.bottom >= player.rect.top - 20):
-                                    presente.kill()
-                                    player.carregar_presente() # Usa o novo método do elfo
+                                    presente.kill() # Remove o presente visual da tela
+                                    player.carregar_presente() # Adiciona à carga do elfo
                                     print(f"Presente coletado! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
-                                    break
-                    elif player.presentes_carregados > 0 and player.position_index == 3:  # Está na mesa e carregando
-                        if game_mechanics.adicionar_presente_mesa(None): # Não precisamos passar o objeto presente aqui por enquanto
-                            mesa_sprite.adicionar_presente_visual()
-                            player.descarregar_presente() # Usa o novo método do elfo
-                            print(f"Presente entregue na mesa! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
-                        else:
-                            print("Mesa cheia! Não foi possível entregar.")
+                                    break # Sai do loop pois já coletou um
 
                 # Coletar da mesa (simula processamento manual)
                 elif event.key == pygame.K_c:
-                    if player.position_index == 3 and not elfo_carregando_presente:
-                        if game_mechanics.elfo_tentar_coletar():
-                            mesa_sprite.remover_presente_visual()
+                    if player.position_index == 3:  # Deve estar na mesa
+                        if mesa_sprite.processar_presente():
                             print("Presente coletado da mesa!")
+                        else:
+                            print("Nenhum presente para processar ou já processando!")
     
                 # Forçar processamento da mesa (tecla P)
                 elif event.key == pygame.K_p:
@@ -197,6 +204,8 @@ def game_loop(screen, clock):
         # --- Renderização ---
         background.draw(screen)
         all_sprites.draw(screen)
+
+        player.desenhar_carga(screen)
        # --- Interface do Usuário ---
         
         # (NOVO) Define e desenha os painéis de fundo para a HUD
@@ -260,10 +269,7 @@ def game_loop(screen, clock):
             screen.blit(texto_processando, (mesa_sprite.rect.centerx - 60, mesa_sprite.rect.top - 50))
         
         # Indicador se elfo está carregando
-        if elfo_carregando_presente:
-            texto_carregando = font_small.render("Carregando Presente!", True, VERDE_ESCURO)
-            screen.blit(texto_carregando, (player.rect.centerx - 70, player.rect.top - 30))
-        
+
         # Instruções (expandidas)
         instrucoes = [
             "=== MOVIMENTO ===",
@@ -285,7 +291,6 @@ def game_loop(screen, clock):
         
         # Informações de debug (se ativado)
         if debug_mode:
-            # (NOVO) Fundo para o painel de debug
             debug_bg_rect = pygame.Rect(LARGURA_TELA - 230, 230, 225, 120)
             debug_surface = pygame.Surface(debug_bg_rect.size, pygame.SRCALPHA)
             debug_surface.fill(PRETO_TRANSPARENTE)
