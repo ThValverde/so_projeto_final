@@ -315,95 +315,62 @@ class MesaDePresentes(pygame.sprite.Sprite):
             return True
         return False
     
-    def finalizar_processamento(self):
+    def finalizar_processamento_visual(self):
         """
-        Finaliza o processamento de um presente (chamado após o tempo de processamento).
+        Finaliza o processamento VISUAL de um presente.
+        A lógica de liberação do semáforo é externa.
         """
         if self.processando and self.itens_visuais:
             self.itens_visuais.pop(0)  # Remove o primeiro presente (FIFO)
             self.presentes_processados_total += 1
             self.processando = False
-            self._redesenhar_superficie()  # Sempre redesenha após remover
-            print(f"[MESA] Presente processado! Restam: {len(self.itens_visuais)}, Total processados: {self.presentes_processados_total}")
+            self._redesenhar_superficie()
+            print(f"[MESA VISUAL] Presente processado! Restam: {len(self.itens_visuais)}, Total processados: {self.presentes_processados_total}")
+            # Não chama mais a lógica de remoção aqui
             return True
-        elif self.processando and not self.itens_visuais:
-            # Se estava processando mas não há mais presentes, para o processamento
+        elif self.processando:
             self.processando = False
             self._redesenhar_superficie()
-            print("[MESA] Processamento cancelado - mesa vazia")
         return False
-    
-    def esta_cheia(self):
-        """Verifica se a mesa está cheia."""
-        return len(self.itens_visuais) >= self.capacidade
-    
-    def esta_vazia(self):
-        """Verifica se a mesa está vazia."""
-        return len(self.itens_visuais) == 0
-    
-    def get_ocupacao(self):
-        """Retorna a ocupação atual da mesa."""
-        return len(self.itens_visuais)
-    
-    def ativar_processamento_automatico(self):
-        """Ativa o processamento automático da mesa."""
-        self.processamento_ativo = True
-        print("[MESA] Processamento automático ativado!")
-    
-    def desativar_processamento_automatico(self):
-        """Desativa o processamento automático da mesa."""
-        self.processamento_ativo = False
-        print("[MESA] Processamento automático desativado!")
-    
-    def ajustar_velocidade_processamento(self, novo_tempo_ms):
-        """Ajusta a velocidade de processamento da mesa."""
-        self.tempo_processamento = max(500, novo_tempo_ms)  # Mínimo de 0.5 segundos
-        print(f"[MESA] Velocidade de processamento ajustada para {self.tempo_processamento}ms")
+
+    def verificar_processamento_concluido(self):
+        """
+        Verifica se o tempo de processamento de um item terminou.
+        Retorna True se um item acabou de ser processado, False caso contrário.
+        Este método é chamado pelo loop principal do jogo.
+        """
+        if self.processando:
+            current_time = pygame.time.get_ticks()
+            tempo_decorrido = current_time - self.tempo_inicio_processamento
+            if tempo_decorrido >= self.tempo_processamento:
+                # O processamento terminou, mas não faz a remoção aqui.
+                # Apenas sinaliza que deve ser feito.
+                return True
+        return False
 
     def update(self):
         """
-        Atualiza a mesa, incluindo processamento automático se ativado.
+        Atualiza a mesa, focando no início do processamento automático.
+        A finalização será tratada pelo loop principal do jogo.
         """
         current_time = pygame.time.get_ticks()
         
-        # Se está processando, verifica se terminou
-        if self.processando:
-            tempo_decorrido = current_time - self.tempo_inicio_processamento
-            if tempo_decorrido >= self.tempo_processamento:
-                self.finalizar_processamento()
-                # Atualiza o timestamp do último processamento
-                self.ultimo_processamento = current_time
-        
-        # Se processamento automático está ativo e há presentes para processar
-        elif (self.processamento_ativo and 
+        # Lógica para INICIAR o processamento, seja manual ou automático
+        if (self.processamento_ativo and 
               len(self.itens_visuais) > 0 and 
               not self.processando):
             
-            # Verifica se já passou tempo suficiente desde o último processamento
             tempo_desde_ultimo = current_time - self.ultimo_processamento
             if tempo_desde_ultimo >= self.tempo_processamento:
                 if self.processar_presente():
-                    # Note: ultimo_processamento será atualizado quando o processamento terminar
+                    # No processamento automático, o último processamento só é atualizado
+                    # quando o item é efetivamente removido no game_loop.
                     pass
-            
-        # Se não há presentes na mesa, reseta o timer
-        elif len(self.itens_visuais) == 0:
+        
+        # Se não há presentes, reseta o timer para evitar processamento imediato
+        # ao adicionar o próximo item.
+        elif len(self.itens_visuais) == 0 and not self.processando:
             self.ultimo_processamento = current_time
-    
-    def debug_status(self):
-        """Retorna informações de debug sobre o estado da mesa."""
-        current_time = pygame.time.get_ticks()
-        return {
-            'presentes_na_mesa': len(self.itens_visuais),
-            'processamento_ativo': self.processamento_ativo,
-            'processando': self.processando,
-            'tempo_desde_ultimo': current_time - self.ultimo_processamento,
-            'tempo_processamento': self.tempo_processamento,
-            'pode_processar': (self.processamento_ativo and 
-                              len(self.itens_visuais) > 0 and 
-                              not self.processando and
-                              (current_time - self.ultimo_processamento) >= self.tempo_processamento)
-        }
 
 
 class ContadorDePresentes(pygame.sprite.Sprite):

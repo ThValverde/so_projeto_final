@@ -179,7 +179,21 @@ def game_loop(screen, clock):
 
         # --- Atualização de Sprites ---
         all_sprites.update()
-        
+        if mesa_sprite.verificar_processamento_concluido():
+            # 1. Tenta remover o item da LÓGICA DE CONTROLE (libera o semáforo)
+            if game_mechanics.elfo_tentar_coletar():
+                # 2. Se a lógica foi bem-sucedida, remove o item VISUAL
+                mesa_sprite.finalizar_processamento_visual()
+                
+                # 3. Atualiza o timer para o próximo processamento automático
+                mesa_sprite.ultimo_processamento = pygame.time.get_ticks()
+                print("[SINCRONIA] Item processado e semáforo liberado.")
+            else:
+                # Caso de segurança: visualmente havia um item, mas logicamente não.
+                # Apenas finaliza o estado visual.
+                mesa_sprite.finalizar_processamento_visual()
+                print("[AVISO] Sincronia corrigida: item visual removido sem contrapartida lógica.")
+                
         # Remove presentes que saíram da tela
         for presente in presentes_sprites:
             if presente.rect.top > ALTURA_TELA:
