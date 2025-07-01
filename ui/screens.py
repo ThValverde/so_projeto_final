@@ -25,7 +25,7 @@ class LoadingScreenToGame:
     def __init__(self, images, durations, audio_path=None):
         """
         Args:
-            images (list): Lista de nomes de arquivos de imagem (ex: ["load1.png", "load2.png"]).
+            images (list): Lista de nomes de arquivos de imagem (ex: ["loading1.png", "loading2.png, loading3.png"]).
             durations (list): Lista de durações em segundos para cada imagem.
             audio_path (str, optional): Caminho para o arquivo de áudio. Defaults to None.
         """
@@ -113,7 +113,7 @@ class EndScreen:
     """Classe para a tela final do jogo."""
     
     def __init__(self):
-        self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, "endscreen.png"))
+        self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, "gamebackground.png"))
         self.image = pygame.transform.scale(self.image, (LARGURA_TELA, ALTURA_TELA))
         self.rect = self.image.get_rect()
 

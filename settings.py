@@ -38,5 +38,6 @@ PRETO_TRANSPARENTE = (0, 0, 0, 128)  # Preto semi-transparente
 
 AUDIO_LOADING_1 = "loading_sound_1.mp3"
 AUDIO_LOADING_2 = "loading_sound_2.mp3"
+AUDIO_LOADING_3 = "loading_sound_3.mp3"
 AUDIO_EXPLICACAO_JOGO = "explicacao_mecanicas.mp3"
 AUDIO_MUSICA_FUNDO = "game_music.mp3"

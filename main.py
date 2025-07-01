@@ -6,7 +6,7 @@ import os
 
 # Imports relativos para funcionar com a execução de módulo (-m)
 from .settings import (LARGURA_TELA, ALTURA_TELA, FPS, PASTA_AUDIO, 
-                       AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_EXPLICACAO_JOGO, AUDIO_MUSICA_FUNDO)
+                       AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, AUDIO_EXPLICACAO_JOGO, AUDIO_MUSICA_FUNDO)
 from .ui.menu import MainMenu
 from .ui.screens import LoadingScreenToGame, EndScreen, GameBackground
 from .game.main_game import game_loop 
@@ -23,9 +23,9 @@ def main():
     
     # Prepara a tela de carregamento com as duas imagens e seus respectivos áudios
     loading_screen = LoadingScreenToGame(
-        images=["loading1.png", "loading2.png"],
-        durations=[3.0, 3.0], # Duração de cada imagem
-        audio_path=[AUDIO_LOADING_1, AUDIO_LOADING_2] # Passa a lista de áudios
+        images=["loading1.png", "loading2.png", "loading3.png"], # Imagens de carregamento
+        durations=[3.0, 3.0, 3.0], # Duração de cada imagem
+        audio_path=[AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3] # Passa a lista de áudios
     )
 
     # Prepara as telas de fim de jogo e fundo
