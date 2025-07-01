@@ -117,6 +117,8 @@ def game_loop(screen, clock):
                         if player.presentes_carregados < player.capacidade_carga:
                             esteira_atual = esteiras[player.position_index]
                             for presente in presentes_sprites:
+                                # --- O CÓDIGO INCORRETO FOI REMOVIDO DAQUI ---
+
                                 # Condição de proximidade para coletar
                                 if (abs(presente.rect.centerx - player.rect.centerx) < 50 and
                                     presente.rect.bottom >= player.rect.top - 20):
@@ -125,13 +127,6 @@ def game_loop(screen, clock):
                                     print(f"Presente coletado! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
                                     break # Sai do loop pois já coletou um
 
-                # Coletar da mesa (simula processamento manual)
-                elif event.key == pygame.K_c:
-                    if player.position_index == 3:  # Deve estar na mesa
-                        if mesa_sprite.processar_presente():
-                            print("Presente coletado da mesa!")
-                        else:
-                            print("Nenhum presente para processar ou já processando!")
     
                 # Forçar processamento da mesa (tecla P)
                 elif event.key == pygame.K_p:
@@ -198,8 +193,10 @@ def game_loop(screen, clock):
         # Remove presentes que saíram da tela
         for presente in presentes_sprites:
             if presente.rect.top > ALTURA_TELA:
-                presente.kill()
+                # Esta é a lógica correta no lugar correto
                 game_mechanics.presentes_perdidos += 1
+                presente.kill()
+                print(f"[QUEDA] Um presente caiu no chão! Total de perdidos: {game_mechanics.presentes_perdidos}")
 
         # --- Renderização ---
         background.draw(screen)
