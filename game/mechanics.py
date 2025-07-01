@@ -151,7 +151,7 @@ class EscalonadorJogo:
         self.nivel_dificuldade = 1
         # self.thread_escalonador.daemon = True
         self.velocidade_queda_atual = 2.0
-        self.taxa_spawn_atual = 1500
+        self.taxa_spawn_atual = 2000
         self.incremento_velocidade_queda = 0.2
         self.fator_aumento_spawn = 0.95
     def iniciar(self):

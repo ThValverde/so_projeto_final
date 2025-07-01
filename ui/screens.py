@@ -39,66 +39,62 @@ class LoadingScreenToGame:
         self.durations = durations
         
         # O caminho do áudio está pronto para o futuro, mas pode ser None por enquanto
-        self.audio_path = audio_path
-
+        self.sounds = []
+        if audio_path:
+            from .. settings import PASTA_AUDIO
+            for audio_file in audio_path:
+                path = os.path.join(PASTA_AUDIO, audio_file)
+                if os.path.exists(path):
+                    self.sounds.append(pygame.mixer.Sound(path))
+                else:
+                    print(f"Áudio {audio_file} não encontrado em {PASTA_AUDIO}.")
+                    self.sounds.append(None)
         # Calcula a duração total da animação somando as durações individuais
         self.total_duration = sum(self.durations)
 
         # Variáveis de estado
-        self.current_image_index = 0
+        self.current_image_index = -1
         self.start_time = None
         self.finished = True # Começa como finalizado, só fica ativo após chamar start()
 
     def start(self):
-        """Inicia ou reinicia a animação da tela de carregamento."""
         print("Iniciando a tela de carregamento...")
         self.start_time = pygame.time.get_ticks()
-        self.current_image_index = 0
+        self.current_image_index = -1
         self.finished = False
 
-        # Lógica para tocar o áudio (pronta para o futuro)
-        if self.audio_path and os.path.exists(self.audio_path):
-            try:
-                pygame.mixer.music.load(self.audio_path)
-                # play() toca uma vez. play(-1) toca em loop. Usamos play() aqui.
-                pygame.mixer.music.play()
-            except pygame.error as e:
-                print(f"Não foi possível carregar o áudio: {e}")
-        else:
-            print("Áudio não fornecido ou não encontrado, rodando apenas com o tempo das imagens.")
-
-
     def update(self):
-        """Atualiza a imagem a ser exibida com base no tempo decorrido."""
-        # Se a animação terminou ou não começou, não faz nada
         if self.finished or self.start_time is None:
             return
 
-        # Calcula o tempo que passou desde o início em segundos
         elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
 
-        # Verifica se o tempo total da animação já passou
         if elapsed_time >= self.total_duration:
             self.finished = True
-            pygame.mixer.music.stop() # Garante que a música pare
+            pygame.mixer.stop() # Para qualquer som que ainda esteja tocando
             print("Tela de carregamento finalizada.")
             return
 
-        # Lógica para descobrir qual imagem mostrar
+        # Descobre o índice da imagem atual
+        target_index = 0
         cumulative_time = 0
         for i, duration in enumerate(self.durations):
             cumulative_time += duration
             if elapsed_time < cumulative_time:
-                self.current_image_index = i
-                break # Encontrou a imagem correta, pode parar o loop
+                target_index = i
+                break
+
+        # (LÓGICA DE ÁUDIO) Se o índice da imagem mudou, toca o novo som
+        if target_index != self.current_image_index:
+            self.current_image_index = target_index
+            # Toca o som correspondente, se ele existir
+            if self.current_image_index < len(self.sounds) and self.sounds[self.current_image_index]:
+                pygame.mixer.stop() # Para o som anterior
+                self.sounds[self.current_image_index].play()
 
     def draw(self, screen):
-        """Desenha a imagem de carregamento atual na tela."""
-        # Só desenha se a animação não tiver terminado
-        if not self.finished and self.images:
-            # Pega a imagem correta da lista
+        if not self.finished and self.images and self.current_image_index != -1:
             current_image = self.images[self.current_image_index]
-            # Desenha a imagem na tela
             screen.blit(current_image, (0, 0))
 
 class GameBackground:

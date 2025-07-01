@@ -101,7 +101,9 @@ def game_loop(screen, clock):
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
+                    # running = False
+                    print("Retornando ao menu principal...")
+                    return 'MENU'
 
                 # Controles do Elfo
                 elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
@@ -235,14 +237,16 @@ def game_loop(screen, clock):
             print(f"Pontuação Final: {game_mechanics.pontuacao}")
             print(f"Presentes Perdidos: {game_mechanics.presentes_perdidos}")
             print("="*30)
-            running = False # Termina o loop do jogo
+            # running = False # Termina o loop do jogo
+            return 'VITORIA'  # Retorna para o menu de vitória
 
         # Verificação da condição de derrota (já existente)
         if game_mechanics.verificar_derrota():
             print("="*30)
             print("FIM DE JOGO! Muitos presentes foram perdidos.")
             # ... (resto da lógica de derrota) ...
-            running = False
+            # running = False
+            return 'DERROTA'  # Retorna para o menu de derrota
 
 
         # --- Renderização ---
