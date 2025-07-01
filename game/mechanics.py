@@ -250,11 +250,12 @@ class GameMechanics:
         
         penalidade_total = self.presentes_perdidos * 10
         limite_derrota = self.pontuacao * 2
-        
-        if penalidade_total >= limite_derrota:
-            return True
-        return False
-    
+        if self.pontuacao != 0:     # condição para evitar derrota logo no início
+            if penalidade_total >= limite_derrota:
+                return True
+            return False
+        else:
+            return False
     def processar_novos_presentes(self):
         """
         Processa presentes criados pelas threads produtoras.
