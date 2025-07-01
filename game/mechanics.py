@@ -273,6 +273,7 @@ class GameMechanics:
         sucesso = self.gerenciador_mesa.adicionar_presente(presente_data)
         if not sucesso:
             self.presentes_perdidos += 1
+            print("[PENALIDADE] Presente perdido! Mesa cheia.")
         return sucesso
     
     def get_estatisticas(self):
