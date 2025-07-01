@@ -167,7 +167,8 @@ def game_loop(screen, clock):
             esteira_escolhida = random.choice(esteiras)
             
             # Cria presente visual
-            novo_presente = Presente(esteira_escolhida, fall_speed=2)
+            novo_presente = Presente(esteira_escolhida, game_mechanics, fall_speed=2)
+            
             presentes_sprites.add(novo_presente)
             all_sprites.add(novo_presente)
             
@@ -191,12 +192,12 @@ def game_loop(screen, clock):
                 print("[AVISO] Sincronia corrigida: item visual removido sem contrapartida lógica.")
 
         # Remove presentes que saíram da tela
-        for presente in presentes_sprites:
-            if presente.rect.top > ALTURA_TELA:
-                # Esta é a lógica correta no lugar correto
-                game_mechanics.presentes_perdidos += 1
-                presente.kill()
-                print(f"[QUEDA] Um presente caiu no chão! Total de perdidos: {game_mechanics.presentes_perdidos}")
+        # for presente in presentes_sprites:
+        #     if presente.rect.top > ALTURA_TELA:
+        #         # Esta é a lógica correta no lugar correto
+        #         game_mechanics.presentes_perdidos += 1
+        #         presente.kill()
+        #         print(f"[QUEDA] Um presente caiu no chão! Total de perdidos: {game_mechanics.presentes_perdidos}")
 
         # --- Renderização ---
         background.draw(screen)

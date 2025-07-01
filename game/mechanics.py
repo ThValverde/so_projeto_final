@@ -256,13 +256,18 @@ class GameMechanics:
     
     def elfo_tentar_coletar(self):
         """
-        Simula elfo tentando coletar presente da mesa.
-        Retorna True se coletou, False se mesa vazia.
+        Simula o processamento de um presente da mesa.
+        Retorna True e incrementa a pontuação se a mesa não estava vazia.
         """
-        presente = self.gerenciador_mesa.remover_presente()
-        if presente:
+        # (LÓGICA CORRIGIDA)
+        # Primeiro, verificamos se a mesa lógica tem algum item para ser processado.
+        if not self.gerenciador_mesa.esta_vazia():
+            # Se não está vazia, removemos o item (não importa qual seja).
+            self.gerenciador_mesa.remover_presente()
+            # E então, garantidamente, adicionamos a pontuação.
             self.pontuacao += 10
             return True
+        # Se a mesa já estava vazia, não faz nada.
         return False
     
     def adicionar_presente_mesa(self, presente_data):

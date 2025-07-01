@@ -178,7 +178,7 @@ class Presente(pygame.sprite.Sprite):
     A velocidade de queda é incrementada até um limite máximo.
     """
 
-    def __init__(self, esteira, fall_speed=1):
+    def __init__(self, esteira, game_mechanics, fall_speed=1, ):
         """
         Args:
             esteira (Esteira): A esteira de onde o presente será gerado.
@@ -186,6 +186,7 @@ class Presente(pygame.sprite.Sprite):
         """
         super().__init__()
         self.esteira = esteira
+        self.game_mechanics = game_mechanics  # Referência ao gerenciador de mecânicas do jogo
         self.fall_speed = fall_speed
 
         tipos_presente = ["presente_visual_1.png", "presente_visual_2.png", "presente_visual_3.png", "presente_visual_4.png"]
@@ -207,8 +208,12 @@ class Presente(pygame.sprite.Sprite):
         """Atualiza a posição do presente, fazendo-o cair."""
         self.rect.y += self.fall_speed
 
-        # Se o presente sair da tela, remove-o do grupo de sprites
+        # (ALTERADO) Lógica de penalidade movida para cá
         if self.rect.top > pygame.display.get_surface().get_height():
+            # Avisa o game_mechanics sobre a perda
+            self.game_mechanics.presentes_perdidos += 1
+            print(f"[QUEDA] Um presente caiu no chão! Total de perdidos: {self.game_mechanics.presentes_perdidos}")
+            # E então se autodestrói
             self.kill()
 
 
