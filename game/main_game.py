@@ -71,6 +71,14 @@ def game_loop(screen, clock):
     except:
         font = pygame.font.Font(None, 24)
         font_small = pygame.font.Font(None, 18)
+
+
+    popup_ativo = False
+    popup_surface = None
+    popup_rect = None
+    popup_duracao = 1500  # Popup ficará ativo por 1.5 segundos
+    popup_tempo_final = 0
+    
     # --- Loop Principal do Jogo ---
     running = True
     
@@ -80,7 +88,10 @@ def game_loop(screen, clock):
     
     while running:
         current_time = pygame.time.get_ticks()
-        
+        # --- (NOVO) Gerenciamento do Estado do Popup ---
+        if popup_ativo and pygame.time.get_ticks() > popup_tempo_final:
+            popup_ativo = False
+            popup_surface = None  # Limpa a superfície para economizar recursos
         # --- Processamento de Eventos ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -110,6 +121,16 @@ def game_loop(screen, clock):
                                 print(f"Presente entregue! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
                             else:
                                 print("Mesa cheia! Elfo BLOQUEADO.")
+                                popup_ativo = True
+                                popup_tempo_final = pygame.time.get_ticks() + popup_duracao
+                                
+                                # Cria o texto do popup
+                                texto_popup = "MESA CHEIA: -1 presente"
+                                # Usaremos a fonte pequena, mas pode criar outra se preferir
+                                popup_surface = font_small.render(texto_popup, True, VERMELHO) 
+                                
+                                # Posiciona o popup acima da mesa
+                                popup_rect = popup_surface.get_rect(center=(mesa_sprite.rect.centerx, mesa_sprite.rect.top - 25))
                     
                     # Se o jogador está em uma das esteiras
                     elif player.position_index < 3:
@@ -229,11 +250,14 @@ def game_loop(screen, clock):
         all_sprites.draw(screen)
 
         player.desenhar_carga(screen)
+
+        if popup_ativo:
+            screen.blit(popup_surface, popup_rect)
        # --- Interface do Usuário ---
         
         # (NOVO) Define e desenha os painéis de fundo para a HUD
         # Painel para as estatísticas da esquerda
-        hud_stats_bg_rect = pygame.Rect(5, 5, 200, 195)
+        hud_stats_bg_rect = pygame.Rect(5, 5, 200, 205)
         stats_surface = pygame.Surface(hud_stats_bg_rect.size, pygame.SRCALPHA)
         stats_surface.fill(PRETO_TRANSPARENTE)
         screen.blit(stats_surface, hud_stats_bg_rect.topleft)
@@ -278,11 +302,15 @@ def game_loop(screen, clock):
         # Presentes perdidos
         texto_perdidos = font_small.render(f"Perdidos: {stats['presentes_perdidos']}", True, VERMELHO)
         screen.blit(texto_perdidos, (10, 150))
+
+        penalidade_total = stats['presentes_perdidos'] * 10
+        texto_penalidade = font_small.render(f"Penalidade: {penalidade_total}", True, VERMELHO)
+        screen.blit(texto_penalidade, (10, 170))
         
         # Contador de presentes ativos na tela
         presentes_ativos = len(presentes_sprites)
         texto_presentes_ativos = font_small.render(f"Presentes Caindo: {presentes_ativos}", True, (255, 255, 0))
-        screen.blit(texto_presentes_ativos, (10, 170))
+        screen.blit(texto_presentes_ativos, (10, 190))
         
         # Indicador se mesa está processando
         if mesa_sprite.processando:

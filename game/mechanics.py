@@ -153,7 +153,7 @@ class EscalonadorJogo:
         self.velocidade_queda_atual = 2.0
         self.taxa_spawn_atual = 1500
         self.incremento_velocidade_queda = 0.2
-        self.fator_aumento_spawn = 0.3
+        self.fator_aumento_spawn = 0.95
     def iniciar(self):
         """Inicia o escalonador."""
         # self.thread_escalonador.start()
