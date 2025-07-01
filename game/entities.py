@@ -96,6 +96,12 @@ class Elfo(pygame.sprite.Sprite):
         # Usar 'center' ajuda a posicionar o sprite pelo seu centro
         self.rect = self.image.get_rect(center=self.positions[self.position_index])
 
+        self.capacidade_carga = 4
+        self.presentes_carregados = 0
+        self.font_carga = pygame.font.Font(FONTE_BOLD_PATH, 20)
+        self.texto_carga = None
+        self.posicao_texto_carga = None
+
     def move(self, direction):
         """
         Move o Elfo para a próxima posição fixa na direção especificada.
@@ -118,13 +124,39 @@ class Elfo(pygame.sprite.Sprite):
         # Atualiza a posição do retângulo do sprite para a nova posição central
         self.rect.center = self.positions[self.position_index]
 
-    def update(self):
-        """
-        O método de atualização do sprite.
-        Por enquanto, não precisa fazer nada, pois o movimento é controlado por eventos.
-        """
-        pass
+    def carregar_presente(self):
+        """Incrementa a contagem de presentes carregados se não atingir a capacidade."""
+        if self.presentes_carregados < self.capacidade_carga:
+            self.presentes_carregados += 1
+            self._atualizar_texto_carga()
 
+    def descarregar_presente(self):
+        """Decrementa a contagem de presentes carregados."""
+        if self.presentes_carregados > 0:
+            self.presentes_carregados -= 1
+            self._atualizar_texto_carga()
+
+    def _atualizar_texto_carga(self):
+        """Atualiza a superfície do texto que indica a quantidade de carga."""
+        cor_texto = (0, 200, 0) # Verde para vazio/pouco carregado
+        if self.presentes_carregados >= self.capacidade_carga * 0.75:
+            cor_texto = (255, 255, 0) # Amarelo para quase cheio
+        elif self.presentes_carregados == self.capacidade_carga:
+            cor_texto = (255, 0, 0)   # Vermelho para cheio
+
+        texto = f"{self.presentes_carregados}"
+        self.texto_carga = self.font_carga.render(texto, True, cor_texto)
+        self.posicao_texto_carga = (self.rect.centerx - self.texto_carga.get_width() // 2,
+                                    self.rect.top - self.texto_carga.get_height() - 5)
+
+    def update(self):
+        # ... (seu código de update atual) ...
+        self._atualizar_texto_carga() # Garante que o texto seja atualizado a cada frame
+
+    def draw(self, surface):
+        super().draw(surface)
+        if self.texto_carga is not None and self.posicao_texto_carga is not None:
+            surface.blit(self.texto_carga, self.posicao_texto_carga)
 
 class Presente(pygame.sprite.Sprite):
     """

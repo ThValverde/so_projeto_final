@@ -91,47 +91,41 @@ def game_loop(screen, clock):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-                
+
                 # Controles do Elfo
                 elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     player.move("left")
                 elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     player.move("right")
-                
+
                 # Ação principal - coletar/entregar presente
                 elif event.key == pygame.K_SPACE:
-                    if not elfo_carregando_presente:
+                    if not elfo_carregando_presente and player.presentes_carregados < player.capacidade_carga:
                         # Tentar coletar presente
                         if player.position_index < 3:  # Está em uma esteira
-                            # Verifica se há presente caindo nesta posição
                             esteira_atual = esteiras[player.position_index]
                             for presente in presentes_sprites:
-                                if (abs(presente.rect.centerx - player.rect.centerx) < 50 and 
+                                if (abs(presente.rect.centerx - player.rect.centerx) < 50 and
                                     presente.rect.bottom >= player.rect.top - 20):
-                                    # Coletou o presente
                                     presente.kill()
-                                    elfo_carregando_presente = True
-                                    presente_carregado = presente
-                                    print("Presente coletado!")
+                                    player.carregar_presente() # Usa o novo método do elfo
+                                    print(f"Presente coletado! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
                                     break
-                    else:
-                        # Tentar entregar presente na mesa
-                        if player.position_index == 3:  # Está na mesa
-                            if game_mechanics.adicionar_presente_mesa(presente_carregado):
-                                mesa_sprite.adicionar_presente_visual()
-                                elfo_carregando_presente = False
-                                presente_carregado = None
-                                print("Presente entregue na mesa!")
-                            else:
-                                print("Mesa cheia! Não foi possível entregar.")
-                
+                    elif player.presentes_carregados > 0 and player.position_index == 3:  # Está na mesa e carregando
+                        if game_mechanics.adicionar_presente_mesa(None): # Não precisamos passar o objeto presente aqui por enquanto
+                            mesa_sprite.adicionar_presente_visual()
+                            player.descarregar_presente() # Usa o novo método do elfo
+                            print(f"Presente entregue na mesa! Carregando: {player.presentes_carregados}/{player.capacidade_carga}")
+                        else:
+                            print("Mesa cheia! Não foi possível entregar.")
+
                 # Coletar da mesa (simula processamento manual)
                 elif event.key == pygame.K_c:
                     if player.position_index == 3 and not elfo_carregando_presente:
                         if game_mechanics.elfo_tentar_coletar():
                             mesa_sprite.remover_presente_visual()
                             print("Presente coletado da mesa!")
-                
+    
                 # Forçar processamento da mesa (tecla P)
                 elif event.key == pygame.K_p:
                     if player.position_index == 3:  # Deve estar na mesa
