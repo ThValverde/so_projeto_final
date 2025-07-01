@@ -76,7 +76,7 @@ def game_loop(screen, clock):
     
     # Timer para gerar presentes visuais
     ultimo_spawn_presente = pygame.time.get_ticks()
-    intervalo_spawn = 1500  # 1.5 segundos para melhor gameplay
+    #intervalo_spawn = 1500  # 1.5 segundos para melhor gameplay
     
     while running:
         current_time = pygame.time.get_ticks()
@@ -162,12 +162,14 @@ def game_loop(screen, clock):
         novos_presentes = game_mechanics.processar_novos_presentes()
         
         # --- Geração Visual de Presentes ---
-        if current_time - ultimo_spawn_presente > intervalo_spawn and len(presentes_sprites) < 6:
+        intervalo_atual = game_mechanics.escalonador.taxa_spawn_atual
+        if current_time - ultimo_spawn_presente > intervalo_atual and len(presentes_sprites) < 6:
             # Escolhe esteira aleatória
             esteira_escolhida = random.choice(esteiras)
             
+            velocidade_atual = game_mechanics.escalonador.velocidade_queda_atual
             # Cria presente visual
-            novo_presente = Presente(esteira_escolhida, game_mechanics, fall_speed=2)
+            novo_presente = Presente(esteira_escolhida, game_mechanics, fall_speed=velocidade_atual)
             
             presentes_sprites.add(novo_presente)
             all_sprites.add(novo_presente)
@@ -204,6 +206,23 @@ def game_loop(screen, clock):
         #         game_mechanics.presentes_perdidos += 1
         #         presente.kill()
         #         print(f"[QUEDA] Um presente caiu no chão! Total de perdidos: {game_mechanics.presentes_perdidos}")
+
+                # --- Condições de Fim de Jogo ---
+        if game_mechanics.pontuacao >= 300:
+            print("="*30)
+            print("VITÓRIA! Você atingiu 300 pontos!")
+            print(f"Pontuação Final: {game_mechanics.pontuacao}")
+            print(f"Presentes Perdidos: {game_mechanics.presentes_perdidos}")
+            print("="*30)
+            running = False # Termina o loop do jogo
+
+        # Verificação da condição de derrota (já existente)
+        if game_mechanics.verificar_derrota():
+            print("="*30)
+            print("FIM DE JOGO! Muitos presentes foram perdidos.")
+            # ... (resto da lógica de derrota) ...
+            running = False
+
 
         # --- Renderização ---
         background.draw(screen)

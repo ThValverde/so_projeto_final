@@ -150,7 +150,10 @@ class EscalonadorJogo:
         self.running = True
         self.nivel_dificuldade = 1
         # self.thread_escalonador.daemon = True
-        
+        self.velocidade_queda_atual = 2.0
+        self.taxa_spawn_atual = 1500
+        self.incremento_velocidade_queda = 0.2
+        self.fator_aumento_spawn = 0.3
     def iniciar(self):
         """Inicia o escalonador."""
         # self.thread_escalonador.start()
@@ -164,8 +167,17 @@ class EscalonadorJogo:
             if produtor.is_alive():
                 produtor.acelerar_producao(0.9) # Fica 10% mais rápido
         
+                # (NOVO) Atualiza os parâmetros de dificuldade do jogo
+        self.velocidade_queda_atual += self.incremento_velocidade_queda
+        self.taxa_spawn_atual *= self.fator_aumento_spawn
+        
+        # Garante que o tempo de spawn não fique rápido demais
+        self.taxa_spawn_atual = max(500, self.taxa_spawn_atual)
+        
         print(f"[ESCALONADOR] Nível {self.nivel_dificuldade} alcançado! Dificuldade aumentada!")
-    
+        print(f"--> Nova velocidade de queda: {self.velocidade_queda_atual:.1f}")
+        print(f"--> Novo intervalo de spawn: {self.taxa_spawn_atual:.0f}ms")
+
     def parar(self):
         self.running = False
 
