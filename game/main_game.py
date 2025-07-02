@@ -163,7 +163,7 @@ def game_loop(screen, clock, game_mechanics):
         stats_surface.fill(PRETO_TRANSPARENTE)
         screen.blit(stats_surface, hud_stats_bg_rect.topleft)
         
-        hud_instructions_bg_rect = pygame.Rect(LARGURA_TELA - 230, 5, 225, 215)
+        hud_instructions_bg_rect = pygame.Rect(LARGURA_TELA - 230, 5, 225, 150)
         instructions_surface = pygame.Surface(hud_instructions_bg_rect.size, pygame.SRCALPHA)
         instructions_surface.fill(PRETO_TRANSPARENTE)
         screen.blit(instructions_surface, hud_instructions_bg_rect.topleft)
