@@ -6,8 +6,8 @@
 import pygame   # Importa a biblioteca Pygame para manipulação de gráficos, som e eventos
 import os   # Importa a biblioteca os para manipulação de caminhos de arquivos e diretórios
 
-from .settings import (LARGURA_TELA, ALTURA_TELA, FPS, PASTA_AUDIO, 
-                       AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, 
+from .settings import (LARGURA_TELA, ALTURA_TELA, FPS, PASTA_AUDIO, AUDIO_START,
+                       AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, AUDIO_LOADING_4,
                        AUDIO_EXPLICACAO_JOGO, AUDIO_MUSICA_FUNDO,
                        FONTE_BOLD_PATH, FONTE_PATH, BRANCO, VERMELHO)
 from .ui.menu import MainMenu
@@ -23,11 +23,13 @@ def main():
     clock = pygame.time.Clock() # Cria um objeto Clock para controlar a taxa de quadros do jogo
 
     # --- Instâncias das Telas ---
-    menu = MainMenu()   # Cria uma instância do menu principal do jogo
-    loading_screen = LoadingScreenToGame(   # Cria uma instância da tela de carregamento
-        images=["loading1.png", "loading2.png", "loading3.png"],    # Lista de imagens de carregamento
-        durations=[3.0, 3.0, 3.0],  # Define a duração de cada imagem de carregamento
-        audio_path=[AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3]  # Lista de caminhos de áudio para cada imagem de carregamento
+    menu = MainMenu()
+    loading_screen = LoadingScreenToGame(
+        images=["loading1.png", "loading2.png", "loading2.png", "loading3.png"],
+        durations=[13.0, 18.0, 39.8, 88.9],
+        # durations = [1,1,1,1],
+        audio_path=[AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, AUDIO_LOADING_4],
+        initial_audio_delay=1.5
     )
     end_screen = EndScreen()    # Cria uma instância da tela de fim de jogo
     game_background = GameBackground()  # Cria uma instância do fundo do jogo
@@ -48,6 +50,20 @@ def main():
         pygame.mixer.music.set_volume(0.25) # Define o volume da música de fundo
     else:
         print(f"AVISO: Música de fundo não encontrada em {path_musica_fundo}")
+
+    path_intro_audio = os.path.join(PASTA_AUDIO, AUDIO_START)
+    if os.path.exists(path_intro_audio):
+        intro_sound = pygame.mixer.Sound(path_intro_audio)
+        intro_sound.play() # Toca uma única vez
+    else:
+        print(f"AVISO: Áudio de introdução não encontrado em {path_intro_audio}")
+
+
+    # --- Máquina de Estados ---
+    game_state = "MENU"
+    game_mechanics_instance = None 
+    running = True
+    is_muted = False
 
     # --- Máquina de Estados ---    
     game_state = "MENU" # Estado inicial do jogo, começa no menu principal
@@ -82,6 +98,9 @@ def main():
                     elif event.key == pygame.K_RETURN:
                         selected_text = menu.options[menu.selected_option]
                         if selected_text == "Iniciar Jogo":
+                            if intro_sound and intro_sound.get_num_channels() > 0:
+                                intro_sound.stop()
+                                
                             game_mechanics_instance = GameMechanics()
                             game_state = "LOADING"
                             loading_screen.start()
