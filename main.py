@@ -39,12 +39,11 @@ def main():
     if os.path.exists(path_explicacao):
         sound_explicacao = pygame.mixer.Sound(path_explicacao)
     
-    # --- (ALTERADO) MÚSICA DE FUNDO É INICIADA AQUI ---
-    path_musica_fundo = os.path.join(PASTA_AUDIO, AUDIO_MUSICA_FUNDO) # Usar PASTA_RAIZ se o caminho em settings.py for relativo
+    path_musica_fundo = os.path.join(PASTA_AUDIO, AUDIO_MUSICA_FUNDO)
     if os.path.exists(path_musica_fundo):
         pygame.mixer.music.load(path_musica_fundo)
-        pygame.mixer.music.play(-1)  # Toca em loop infinito
-        pygame.mixer.music.set_volume(0.25) # Define o volume baixo uma única vez
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.25)
     else:
         print(f"AVISO: Música de fundo não encontrada em {path_musica_fundo}")
 
@@ -54,32 +53,24 @@ def main():
     running = True
     is_muted = False
 
-
     while running:
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 running = False
             
+            # --- Lógica de Eventos por Estado ---
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_m:
-                    is_muted = not is_muted # Inverte o estado (mudo/não mudo)
-                    if is_muted:
-                        pygame.mixer.music.pause() # Pausa a música
-                        print("Música mutada.")
-                    else:
-                        pygame.mixer.music.unpause() # Retoma a música
-                        print("Música retomada.")
+                    is_muted = not is_muted
+                    if is_muted: pygame.mixer.music.pause()
+                    else: pygame.mixer.music.unpause()
                 elif event.key == pygame.K_v:
-                    # incrementa o volume de 25 em 25 - ao chegar a 100, volta pra 25
                     current_volume = pygame.mixer.music.get_volume()
                     new_volume = current_volume + 0.25
-                    if new_volume > 1.0:
-                        new_volume = 0.25
+                    if new_volume > 1.0: new_volume = 0.25
                     pygame.mixer.music.set_volume(new_volume)
-                    print(f"Volume ajustado para: {new_volume * 100:.0f}%")
 
-            # --- Lógica de Eventos por Estado ---
             if game_state == "MENU":
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
@@ -106,6 +97,7 @@ def main():
                     elif event.key == pygame.K_ESCAPE:
                         game_state = "MENU"
 
+        # --- Lógica de Atualização e Renderização por Estado ---
         screen.fill((0, 0, 0))
 
         if game_state == "MENU":
@@ -125,13 +117,9 @@ def main():
                 game_state = "PLAYING"
                 if game_mechanics_instance:
                     game_mechanics_instance.iniciar_sistema()
-                # A lógica de iniciar a música foi REMOVIDA daqui
 
         elif game_state == "PLAYING":
             resultado = game_loop(screen, clock, game_mechanics_instance)
-            
-            # (ALTERADO) A linha que parava a música foi REMOVIDA daqui
-            # pygame.mixer.music.stop() 
             
             if game_mechanics_instance:
                 game_mechanics_instance.parar_sistema()
@@ -141,12 +129,33 @@ def main():
             else:
                 game_state = "MENU"
 
-        elif game_state in ["GAME_OVER_VITORIA", "GAME_OVER_DERROTA"]:
+        # --- (BLOCO DE CÓDIGO CORRIGIDO/ADICIONADO) ---
+        elif game_state == "GAME_OVER_VITORIA":
             end_screen.draw(screen)
-            # ... (código para desenhar texto de vitória/derrota) ...
+            texto_titulo = font_fim_titulo.render("VITÓRIA!", True, BRANCO)
+            texto_instrucao = font_fim_instrucao.render("Pressione ENTER para jogar de novo ou ESC para o menu", True, BRANCO)
+            screen.blit(texto_titulo, texto_titulo.get_rect(center=(LARGURA_TELA/2, ALTURA_TELA/2 - 50)))
+            screen.blit(texto_instrucao, texto_instrucao.get_rect(center=(LARGURA_TELA/2, ALTURA_TELA/2 + 50)))
+
+        elif game_state == "GAME_OVER_DERROTA":
+            end_screen.draw(screen)
+            texto_titulo = font_fim_titulo.render("FIM DE JOGO", True, VERMELHO)
+            texto_instrucao = font_fim_instrucao.render("Pressione ENTER para jogar de novo ou ESC para o menu", True, BRANCO)
+            screen.blit(texto_titulo, texto_titulo.get_rect(center=(LARGURA_TELA/2, ALTURA_TELA/2 - 50)))
+            screen.blit(texto_instrucao, texto_instrucao.get_rect(center=(LARGURA_TELA/2, ALTURA_TELA/2 + 50)))
+
+
+        # Lógica de Mudo (desenha por cima de tudo)
+        if is_muted:
+            texto_mudo = font_fim_instrucao.render("Mudo (M)", True, BRANCO)
+            pos_x = LARGURA_TELA - texto_mudo.get_width() - 10
+            pos_y = ALTURA_TELA - texto_mudo.get_height() - 10
+            screen.blit(texto_mudo, (pos_x, pos_y))
+
 
         pygame.display.flip()
         clock.tick(FPS)
 
-    # A música irá parar automaticamente com pygame.quit()
+    if game_mechanics_instance:
+        game_mechanics_instance.parar_sistema()
     pygame.quit()

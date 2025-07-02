@@ -33,7 +33,7 @@ LARANJA = (255, 165, 0)  # Laranja
 ROXO = (128, 0, 128)  # Roxo
 PRETO_TRANSPARENTE = (0, 0, 0, 128)  # Preto semi-transparente
 # --- Áudios ---
-AUDIO_LOADING_1 = "loading_sound_1.mp3"
+AUDIO_LOADING_1 = "ElevenLabs_2025-06-28T18_25_08_Sergio _pvc_sp95_s50_sb70_v3.mp3"
 AUDIO_LOADING_2 = "loading_sound_2.mp3"
 AUDIO_LOADING_3 = "loading_sound_3.mp3"
 AUDIO_EXPLICACAO_JOGO = "explicacao_mecanicas.mp3"
