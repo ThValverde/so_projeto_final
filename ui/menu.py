@@ -69,7 +69,7 @@ class MainMenu:
             # 1. Desenha a caixa preta de fundo
             pygame.draw.rect(screen, PRETO, option_box_rect, border_radius=5)
 
-            # 2. (NOVO e com um toque especial) Desenha a borda por cima
+            # 2. Desenha a borda por cima
             # A cor da borda muda para BRANCO quando a opção está selecionada!
             cor_borda = BRANCO if i == self.selected_option else VERMELHO
             pygame.draw.rect(screen, cor_borda, option_box_rect, width=3, border_radius=5)
