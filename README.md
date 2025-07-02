@@ -21,7 +21,7 @@ No jogo, você controla um ajudante do Papai Noel em uma oficina de presentes. S
 git clone https://github.com/ThValverde/so_projeto_final.git
 ```
 
-**Execute o jogo:
+**Execute o jogo:**
 ```bash
 python3 so_projeto_final/run_game.py
 ```
