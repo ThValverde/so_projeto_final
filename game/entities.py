@@ -1,90 +1,87 @@
-# game/entities.py
-# Define as classes que representam os "atores" do jogo, incluindo as threads.
+# entities.py
+# Define as classes que representam os "atores" visuais e interativos do jogo.
+# como elfo, esteiras, mesa e os presentes que caem.
 
 from ..settings import PASTA_IMAGENS, FONTE_PATH, VERDE_ESCURO, VERDE_CLARO, FONTE_BOLD_PATH, VERMELHO
-import os
-import pygame
-import threading
-import random
-import math
+import os       # Importa o módulo os para manipulação de caminhos de arquivos
+import pygame   #   Importa o Pygame para manipulação de gráficos e eventos
+import threading    # Importa threading para criar threads de geração de presentes
+import random   # Importa random para gerar presentes aleatórios
+import math # Importa math para cálculos matemáticos, como seno para animação
 
 class Esteira(pygame.sprite.Sprite):
     """
-    Representa uma esteira animada que produz presentes.
-    A animação alterna entre duas texturas para simular movimento.
+    Representa o jogador.
+    ANALOGIA: Atua como o processo CONSUMIDOR, que retira itens das esteiras
+    e os coloca no buffer (Mesa). Também inicia o consumo do buffer (processamento).
     """
     def __init__(self, position, size=(200, 200)):
         """
-        Args:
-            position (tuple): A posição (x, y) do canto superior esquerdo da esteira.
-            size (tuple): O novo tamanho (largura, altura) para a imagem da esteira.
+        position (tuple): Posição inicial do sprite (x, y).
+        size (tuple): Tamanho para reescalar os frames da esteira.
         """
         super().__init__()
 
-        # --- Carregamento e Reescalonamento dos Frames ---
-        
-        # Carrega as imagens originais
+        # --- Carregamento das Imagens ---
         original_frame_1 = pygame.image.load(os.path.join(PASTA_IMAGENS, "esteira_frame_1.png")).convert_alpha()
         original_frame_2 = pygame.image.load(os.path.join(PASTA_IMAGENS, "esteira_frame_2.png")).convert_alpha()
-        
         # Reescala as imagens para o novo tamanho fornecido
         frame_1 = pygame.transform.scale(original_frame_1, size=(200, 200))
         frame_2 = pygame.transform.scale(original_frame_2, size=(200, 200))
-
         # Armazena os frames já reescalados na lista
-        self.frames = [frame_1, frame_2]
-        self.frame_index = 0
-
-        # O resto do código funciona normalmente com as imagens já no novo tamanho
-        self.image = self.frames[self.frame_index]
-        self.rect = self.image.get_rect(topleft=position)
-
+        self.frames = [frame_1, frame_2]    #   Lista de frames da animação da esteira
+        self.frame_index = 0    #   Índice do frame atual da animação
+        self.image = self.frames[self.frame_index]  #   Define a imagem inicial como o primeiro frame
+        self.rect = self.image.get_rect(topleft=position)   #   Retângulo do sprite, usado para posicionamento e colisão
         # --- Controle da Animação ---
-        self.animation_speed_ms = 200 
-        self.last_update = pygame.time.get_ticks()
-
+        self.animation_speed_ms = 200   # Tempo em milissegundos entre cada frame da animação
+        self.last_update = pygame.time.get_ticks()  # Marca o tempo do último update da animação
         # --- Estado da Esteira ---
-        self.ligada = True
+        self.ligada = True  #   Indica se a esteira está ligada ou não. Se desligada, não anima.
 
     def animate(self):
         """Controla a lógica de troca de frames da animação."""
         if not self.ligada:
             return
-        now = pygame.time.get_ticks()
-        if now - self.last_update > self.animation_speed_ms:
-            self.last_update = now
-            self.frame_index = (self.frame_index + 1) % len(self.frames)
-            self.image = self.frames[self.frame_index]
+        now = pygame.time.get_ticks()   #   Obtém o tempo atual em milissegundos
+        if now - self.last_update > self.animation_speed_ms:    #   Verifica se é hora de trocar o frame
+            self.last_update = now  #   Atualiza o tempo do último frame
+            self.frame_index = (self.frame_index + 1) % len(self.frames)    #   Incrementa o índice do frame, voltando ao início se necessário
+            self.image = self.frames[self.frame_index]  #   Atualiza a imagem do sprite com o novo frame
 
     def update(self):
         """Método de atualização do sprite, chamado uma vez por frame."""
-        self.animate()
+        self.animate()  # Chama o método de animação para atualizar o frame atual
     
     def ligar(self):
         """Liga a animação da esteira."""
-        self.ligada = True
+        self.ligada = True  #   Permite que a animação seja executada
 
     def desligar(self):
         """Desliga a animação da esteira."""
-        self.ligada = False
+        self.ligada = False #   Impede que a animação seja executada, mantendo o frame atual
 
 
 class Elfo(pygame.sprite.Sprite):
     """
-    Representa o jogador (Elfo), que se move entre posições fixas.
+    Representa o jogador.
+    ANALOGIA: Atua como o processo CONSUMIDOR, que retira itens das esteiras
+    e os coloca no buffer (Mesa). Também inicia o consumo do buffer (processamento).
+    O Elfo pode se mover entre posições fixas (representando as esteiras e a mesa).
+    Possui uma capacidade de carga limitada para carregar presentes.
+    Pode carregar e descarregar presentes, além de aumentar sua capacidade de carga.
     """
     def __init__(self, positions, start_index=0):
         """
+        Inicializa o Elfo com uma imagem, posições possíveis e um índice inicial.
         Args:
-            positions (list): Uma lista de tuplas (x, y) representando as posições fixas.
-            start_index (int): O índice da lista 'positions' onde o Elfo deve começar.
+            positions (list): Lista de tuplas representando as posições possíveis do Elfo.
+            start_index (int): Índice inicial na lista de posições.
         """
         super().__init__()
 
         # --- Carregamento da Imagem ---
-        # Carrega a imagem do Elfo. Altere o nome do arquivo se necessário.
         self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, "elfo.png")).convert_alpha()
-        # Você pode reescalar a imagem se precisar, exemplo:
         self.image = pygame.transform.scale(self.image, (100, 100))
 
         # --- Lógica de Posição ---
@@ -92,16 +89,16 @@ class Elfo(pygame.sprite.Sprite):
         self.position_index = start_index  # Guarda o índice da posição atual
 
         # Define o retângulo do sprite e o posiciona no ponto inicial
-        # Usar 'center' ajuda a posicionar o sprite pelo seu centro
+        # A posição inicial é baseada no índice fornecido
         self.rect = self.image.get_rect(center=self.positions[self.position_index])
 
-        self.capacidade_carga = 10
-        self.presentes_carregados = 0
-        self.font_carga = pygame.font.Font(FONTE_BOLD_PATH, 20)
-        self.texto_carga = None
-        self.posicao_texto_carga = None
+        self.capacidade_carga = 10  #   Capacidade máxima de carga do Elfo
+        self.presentes_carregados = 0   #   Contador de presentes atualmente carregados pelo Elfo
+        self.font_carga = pygame.font.Font(FONTE_BOLD_PATH, 20) # Fonte para o texto de carga
+        self.texto_carga = None # Superfície para o texto de carga
+        self.posicao_texto_carga = None # Posição do texto de carga em relação ao retângulo do sprite
 
-    def move(self, direction):
+    def move(self, direction):  
         """
         Move o Elfo para a próxima posição fixa na direção especificada.
 
@@ -143,16 +140,14 @@ class Elfo(pygame.sprite.Sprite):
         elif self.presentes_carregados >= self.capacidade_carga * 0.75:
             cor_texto = (255, 255, 0) # Amarelo para quase cheio
 
-        texto = f"{self.presentes_carregados}"
+        texto = f"{self.presentes_carregados}"  # Quantidade de presentes carregados
         self.texto_carga = self.font_carga.render(texto, True, cor_texto)
         self.posicao_texto_carga = (self.rect.centerx - self.texto_carga.get_width() // 2,
                                     self.rect.top - self.texto_carga.get_height() - 5)
-    def desenhar_carga(self, surface):
+    def desenhar_carga(self, surface):  
         """Desenha o indicador de carga sobre a cabeça do elfo."""
-        # A verificação 'if self.texto_carga ...' já garante que nada é desenhado se não houver texto
         if self.presentes_carregados > 0 and self.texto_carga is not None:
-            # Posição do texto é recalculada em _atualizar_texto_carga, que é chamado no update.
-            # Apenas desenhamos aqui.
+            # Desenha o texto de carga acima do Elfo
             pos_x = self.rect.centerx - self.texto_carga.get_width() // 2
             pos_y = self.rect.top - self.texto_carga.get_height() - 5
             surface.blit(self.texto_carga, (pos_x, pos_y))
@@ -162,24 +157,18 @@ class Elfo(pygame.sprite.Sprite):
         self.capacidade_carga += aumento
         print(f"[LEVEL UP] Capacidade do elfo aumentada para: {self.capacidade_carga}")
         
-    def update(self):
+    def update(self):   #   Método de atualização do sprite, chamado uma vez por frame.
         """Atualiza o Elfo, incluindo a animação do texto de carga."""
         self._atualizar_texto_carga() # Garante que o texto seja atualizado a cada frame
 
-    def draw(self, surface):
-        super().draw(surface)
+    def draw(self, surface):    #   Método de desenho, chamado uma vez por frame.
+        super().draw(surface)   # Desenha o sprite do Elfo na superfície fornecida
         if self.texto_carga is not None and self.posicao_texto_carga is not None:
             surface.blit(self.texto_carga, self.posicao_texto_carga)
 
-class Presente(pygame.sprite.Sprite):
+class Presente(pygame.sprite.Sprite):   
     """
-    Representa um presente que pode ser coletado pelo Elfo.
-    O presente é gerado em uma posição acima de uma esteira e cai em direção ao chão.
-    Possui uma taxa de aparecimento controlada por uma thread.
-    O jogo deve garantir que os presentes sejam gerados um por vez
-    e alternando entre as esteiras.
-    A taxa de aprecimento é incrementada até um limite máximo.
-    A velocidade de queda é incrementada até um limite máximo.
+    Representa o item de "trabalho" do jogo. Produzido e consumido.
     """
 
     def __init__(self, esteira, game_mechanics, fall_speed=1, ):
@@ -188,14 +177,14 @@ class Presente(pygame.sprite.Sprite):
             esteira (Esteira): A esteira de onde o presente será gerado.
             fall_speed (int): A velocidade inicial de queda do presente.
         """
-        super().__init__()
-        self.esteira = esteira
+        super().__init__()  
+        self.esteira = esteira  # Referência à esteira de onde o presente foi gerado
         self.game_mechanics = game_mechanics  # Referência ao gerenciador de mecânicas do jogo
-        self.fall_speed = fall_speed
-
+        self.fall_speed = fall_speed    # Velocidade de queda do presente
+        # --- Carregamento da Imagem do Presente ---
         tipos_presente = ["presente_visual_1.png", "presente_visual_2.png", "presente_visual_3.png", "presente_visual_4.png"]
-        tipo_escolhido = random.choice(tipos_presente)
-        
+        tipo_escolhido = random.choice(tipos_presente)  # Escolhe aleatoriamente um tipo de presente
+        # Tenta carregar a imagem do presente escolhido
         try:
             self.image = pygame.image.load(os.path.join(PASTA_IMAGENS, tipo_escolhido)).convert_alpha()
         except:
@@ -208,11 +197,10 @@ class Presente(pygame.sprite.Sprite):
         # Define o retângulo do sprite e posiciona acima da esteira
         self.rect = self.image.get_rect(center=(self.esteira.rect.centerx, self.esteira.rect.top+30))
 
-    def update(self):
+    def update(self):   
         """Atualiza a posição do presente, fazendo-o cair."""
-        self.rect.y += self.fall_speed
+        self.rect.y += self.fall_speed  # Move o presente para baixo pela velocidade de queda
 
-        # (ALTERADO) Lógica de penalidade movida para cá
         if self.rect.top > pygame.display.get_surface().get_height():
             # Avisa o game_mechanics sobre a perda
             self.game_mechanics.presentes_perdidos += 1
@@ -228,35 +216,36 @@ class GeradorPresentes(threading.Thread):
     """
     def __init__(self, esteira, fall_speed=1, spawn_rate=1000):
         super().__init__()
-        self.esteira = esteira
-        self.fall_speed = fall_speed
+        self.esteira = esteira  # Referência à esteira onde os presentes serão gerados
+        self.fall_speed = fall_speed    # Velocidade de queda dos presentes
         self.spawn_rate = spawn_rate  # Tempo em milissegundos entre cada geração de presente
-        self.running = True
+        self.running = True # Flag para controlar a execução da thread
 
     def run(self):
         """Método que executa a thread de geração de presentes."""
-        while self.running:
-            pygame.time.delay(self.spawn_rate)
+        while self.running:     
+            pygame.time.delay(self.spawn_rate)  # Espera pelo tempo de spawn definido
             if self.running:  # Verifica se a thread ainda está ativa
                 presente = Presente(self.esteira, fall_speed=self.fall_speed)
                 self.esteira.add(presente)  # Adiciona o presente ao grupo da esteira
 
     def stop(self):
         """Método para parar a thread de geração de presentes."""
-        self.running = False
-        self.join()
+        self.running = False    # Para parar a thread
+        self.join() # Aguarda a thread terminar antes de continuar
 
 
 class MesaDePresentes(pygame.sprite.Sprite):
+    """
+    Representa a interface VISUAL do recurso compartilhado.
+    Seu estado (número de presentes visuais) reflete o estado do
+    'GerenciadorMesa' lógico.
+    """
     def __init__(self, position, capacidade=3):
         super().__init__()
         TAMANHO_VISUAL_PRESENTE = (100, 100)
-        # --- CORREÇÃO 1: Sintaxe do os.path.join e nome da variável ---
-        # A variável foi padronizada para self.image_base
         self.original_image = pygame.image.load(os.path.join(PASTA_IMAGENS, "mesadeembrulhos.png")).convert_alpha()
-        
         self.image_base = pygame.transform.scale(self.original_image, size=(150, 80))
-
         self.visuais_presentes = []
         # Usa presente_visual_1.png até presente_visual_4.png na mesa
         tipos_presente = ["presente_visual_1.png", "presente_visual_2.png", "presente_visual_3.png", "presente_visual_4.png"]
@@ -285,11 +274,8 @@ class MesaDePresentes(pygame.sprite.Sprite):
         # --- Estado visual do processamento ---
         self.processando = False
         self.tempo_inicio_processamento = 0
-
         self.posicoes_slots = [(-5, -40), (35, -40), (75, -40)] # Ajuste essas posições se necessário
-
         self.image = self.image_base.copy()
-        # --- CORREÇÃO 2: Typo em self.image ---
         self.rect = self.image.get_rect(center = position)
 
     def _redesenhar_superficie(self):
@@ -298,20 +284,17 @@ class MesaDePresentes(pygame.sprite.Sprite):
         É chamado sempre que um item é adicionado ou removido.
         """
         self.image = self.image_base.copy()
-
         # Desenha os presentes na mesa
         for i, presente_img in enumerate(self.itens_visuais):
             # Garante que não tentemos acessar um slot que não existe
             if i < len(self.posicoes_slots):
                 posicao_no_slot = self.posicoes_slots[i]
-                
                 # Se está processando e é o primeiro presente, adiciona efeito visual
                 if self.processando and i == 0:
                     # Cria uma cópia da imagem do presente com transparência
                     presente_processando = presente_img.copy()
                     presente_processando.set_alpha(150)  # Torna semi-transparente
                     self.image.blit(presente_processando, posicao_no_slot)
-                    
                     # Adiciona um pequeno texto indicando processamento
                     try:
                         font_pequena = pygame.font.Font(None, 16)
@@ -327,10 +310,9 @@ class MesaDePresentes(pygame.sprite.Sprite):
         Adiciona a aparência de um novo presente à mesa - se houver espaço
         retorna True se sucesso
         """
-        if len(self.itens_visuais) < self.capacidade:
-            novo_presente_img = random.choice(self.visuais_presentes)
-            self.itens_visuais.append(novo_presente_img)
-
+        if len(self.itens_visuais) < self.capacidade:   # Verifica se há espaço na mesa
+            novo_presente_img = random.choice(self.visuais_presentes) # Escolhe aleatoriamente uma imagem de presente
+            self.itens_visuais.append(novo_presente_img)    
             self._redesenhar_superficie()
             print(f"Visual de presente adicionado. Itens na mesa: {len(self.itens_visuais)}")
             return True
@@ -343,17 +325,17 @@ class MesaDePresentes(pygame.sprite.Sprite):
         Remove a aparência de um presente da mesa.
         Retorna True se bem-sucedido, False caso contrário.
         """
-        if self.itens_visuais:
-            self.itens_visuais.pop(0) 
+        if self.itens_visuais:  # Verifica se há presentes na mesa
+            self.itens_visuais.pop(0)   # Remove o primeiro presente (FIFO)
             
-            self._redesenhar_superficie()
+            self._redesenhar_superficie()   
             print(f"Visual de presente removido. Itens na mesa: {len(self.itens_visuais)}")
             return True
         else:
             print("Visual da mesa já está vazio.")
             return False
 
-    def processar_presente(self):
+    def processar_presente(self):   
         """
         Processa (remove) um presente da mesa, simulando o trabalho de embrulho.
         Retorna True se processou um presente, False se mesa vazia.
@@ -372,15 +354,15 @@ class MesaDePresentes(pygame.sprite.Sprite):
         """
         if self.processando and self.itens_visuais:
             self.itens_visuais.pop(0)  # Remove o primeiro presente (FIFO)
-            self.presentes_processados_total += 1
-            self.processando = False
+            self.presentes_processados_total += 1   # Contador de presentes processados
+            self.processando = False    # Reseta o estado de processamento
             self._redesenhar_superficie()
             print(f"[MESA VISUAL] Presente processado! Restam: {len(self.itens_visuais)}, Total processados: {self.presentes_processados_total}")
             # Não chama mais a lógica de remoção aqui
-            return True
-        elif self.processando:
-            self.processando = False
-            self._redesenhar_superficie()
+            return True 
+        elif self.processando:      # Se estava processando mas não há itens visuais
+            self.processando = False    # Reseta o estado de processamento
+            self._redesenhar_superficie()   # Atualiza a imagem da mesa
         return False
 
     def verificar_processamento_concluido(self):
@@ -404,11 +386,10 @@ class MesaDePresentes(pygame.sprite.Sprite):
         A finalização será tratada pelo loop principal do jogo.
         """
         current_time = pygame.time.get_ticks()
-        
-        # Lógica para INICIAR o processamento, seja manual ou automático
-        if (self.processamento_ativo and 
-              len(self.itens_visuais) > 0 and 
-              not self.processando):
+        # Se o processamento automático está ativo, verifica se deve processar
+        if (self.processamento_ativo and    #   Se o processamento automático está ativo
+              len(self.itens_visuais) > 0 and #  # Se há itens visuais na mesa
+              not self.processando):    # Se não está processando atualmente
             
             tempo_desde_ultimo = current_time - self.ultimo_processamento
             if tempo_desde_ultimo >= self.tempo_processamento:
@@ -495,7 +476,7 @@ class ContadorDePresentes(pygame.sprite.Sprite):
         novo_width = int(self.presente_original_size[0] * scale_factor)
         novo_height = int(self.presente_original_size[1] * scale_factor)
 
-        # Redimensiona a imagem original (importante para não perder qualidade)
+        # Redimensiona a imagem original
         self.presente_animado_img = pygame.transform.scale(self.presente_original_img, (novo_width, novo_height))
 
         # Chama o método para redesenhar a superfície combinada com o ícone no novo tamanho
