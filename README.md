@@ -1,4 +1,4 @@
-# Oficina do Noel
+# Oficina do Noel 🎅
 
 Um jogo educativo desenvolvido para a disciplina **SSC0640 - Sistemas Operacionais I**. O projeto simula conceitos de concorrência, sincronização e gerenciamento de recursos utilizando a biblioteca [Pygame](https://www.pygame.org/).
 
@@ -16,6 +16,11 @@ No jogo, você controla um ajudante do Papai Noel em uma oficina de presentes. S
 
 # 🚀 Como Clonar e Executar
 
+**Instale as dependências
+```bash
+pip install pygame
+```
+
 **Escolha um diretório e clone o repositório:**
 ```bash
 git clone https://github.com/ThValverde/so_projeto_final.git
@@ -26,19 +31,19 @@ git clone https://github.com/ThValverde/so_projeto_final.git
 python3 so_projeto_final/run_game.py
 ```
 
-# 🎮 COMO JOGAR - Oficina do Noel
+# 🎮 Como Jogar
 
-## 🎯 **OBJETIVO**
+## 🎯 **Objetivos**
 Gerencie a oficina do Papai Noel como um duende! Colete presentes das esteiras e organize-os na mesa de embrulho, vivenciando conceitos de Sistemas Operacionais de forma prática e divertida.
 
-## 🕹️ **CONTROLES**
+## 🕹️ **Controles**
 - **←/→ ou A/D**: Mover o duende entre as posições
 - **ESPAÇO**: Coletar presente (em esteira) ou entregar na mesa
 - **P**: Processar imediatamente (na mesa)
 - **-**: Diminuir velocidade do processamento automático
 - **ESC**: Voltar ao menu
 
-## 📋 **COMO JOGAR**
+## 📋 **Tutorial**
 
 ### 1. **Posições do Duende**
 O duende pode ocupar 4 posições:
@@ -69,7 +74,7 @@ O duende pode ocupar 4 posições:
     Penalidade = Presentes Perdidos x 10
     - Você perde se: Penalidade >= Pontuação x 2
 
-## 🧠 **CONCEITOS DE SO DEMONSTRADOS**
+## 🧠 **Conceitos de Sistemas Operacionais Demonstrados**
 
 ### **Threads**
 - Cada esteira funciona em uma thread separada, produzindo presentes independentemente
@@ -85,7 +90,7 @@ O duende pode ocupar 4 posições:
 ### **Escalonamento**
 - A dificuldade aumenta automaticamente, simulando um escalonador de CPU
 
-## 📊 **INTERFACE**
+## 📊 **Interface**
 - **Pontuação**: Presentes processados
 - **Nível**: Velocidade de produção
 - **Mesa**: Ocupação atual (X/3)
@@ -96,7 +101,7 @@ O duende pode ocupar 4 posições:
 - **"Carregando Presente!"**: Duende está com presente
 - **"Processando... X.Xs"**: Processamento em andamento
 
-## ⚠️ **SITUAÇÕES ESPECIAIS**
+## ⚠️ **Situações Especiais**
 
 ### **Mesa Cheia**
 - Não é possível entregar mais presentes
@@ -111,7 +116,7 @@ O duende pode ocupar 4 posições:
 - Colete e entregue presentes primeiro
 - **Demonstra**: Buffer vazio no produtor-consumidor
 
-## 🏆 **PONTUAÇÃO**
+## 🏆 **Pontuação**
 - **+10 pontos**: Cada presente processado
 - **Objetivo**: Maximize a eficiência da oficina!
 - **Desafio**: Quantos presentes você consegue processar?
@@ -119,18 +124,6 @@ O duende pode ocupar 4 posições:
 ---
 
 **Divirta-se aprendendo Sistemas Operacionais na prática! 🎄🎁**
-
-## Como Preparar e Executar o Jogo
-
-1. Instale as dependências:
-    ```bash
-    pip install pygame
-    ```
-2. Execute o jogo:
-    ```bash
-    python main.py
-    ```
-3. Use as setas ou teclas `A/D` para mover, `Espaço` para interagir e `ESC` para voltar ao menu.
 
 ## Estrutura do Projeto
 
@@ -150,14 +143,14 @@ so_projeto_final/
 
 ## Créditos
 
-- Desenvolvido por:
-Felipe de Oliveira Gomes,
-Leonardo Codeceira Gonçalves Pinto,
-Leonardo Silva Cardoso e
-Thiago de Castro Valverde
-- Disciplina: SSC0640 - Sistemas Operacionais I
-- Professor: Prof. Dr. Rodolfo I. Meneguette
-- Universidade de São Paulo (USP)
+### Desenvolvido por:
+    Felipe de Oliveira Gomes
+    Leonardo Codeceira Gonçalves Pinto
+    Leonardo Silva Cardoso
+    Thiago de Castro Valverde
+### Disciplina: SSC0640 - Sistemas Operacionais I
+    Orientador: Prof. Dr. Rodolfo I. Meneguette
+### Instituto de Ciênicas Matemáticas e de Computação (ICMC) da Universidade de São Paulo (USP)
 
 ## Licença
 
