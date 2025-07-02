@@ -55,6 +55,19 @@ def game_loop(screen, clock, game_mechanics):
         font = pygame.font.Font(None, 24)   # Fonte padrão do Pygame se não for possível carregar a fonte personalizada
         font_small = pygame.font.Font(None, 18) # Fonte menor padrão do Pygame
 
+
+    # --- Lógica áudio Evento 100 pontos ---
+    sound_100_pontos  = None    # Variável para armazenar o som de 100 pontos, inicialmente None
+    try:
+        from ..settings import AUDIO_MIDGAME, PASTA_AUDIO   # Importa o caminho do áudio de 100 pontos e a pasta de áudio
+        import os
+        path_100_pontos = os.path.join(PASTA_AUDIO, AUDIO_MIDGAME) # Caminho para o áudio de 100 pontos
+        if os.path.exists(path_100_pontos): # Verifica se o arquivo de áudio existe
+            sound_100_pontos = pygame.mixer.Sound(path_100_pontos)  # Carrega o áudio de 100 pontos
+    except (ImportError, pygame.error) as e:
+        print(f"AVISO: Não foi possível carregar o áudio de 100 pontos: {e}")
+
+    audio_100_pontos_tocado = False  # Flag para indicar se o áudio de 100 pontos foi tocado
     # --- Variáveis de Controle do Jogo ---
     popup_ativo = False # Flag para controlar se o popup de mensagem está ativo
     popup_surface = None    # Superfície do popup que será desenhada na tela
@@ -136,7 +149,16 @@ def game_loop(screen, clock, game_mechanics):
                 mesa_sprite.finalizar_processamento_visual()    # Finaliza o processamento visual do presente
                 mesa_sprite.ultimo_processamento = current_time   # Atualiza o tempo do último processamento
             else:
-                mesa_sprite.finalizar_processamento_visual() # Finaliza o processamento visual do presente mesmo se o elfo não coletou    
+                mesa_sprite.finalizar_processamento_visual() # Finaliza o processamento visual do presente mesmo se o elfo não coletou         
+        
+        # --- Evento áudio 100 pontos ---
+        if (not audio_100_pontos_tocado and 
+            game_mechanics.pontuacao >= 100 and 
+            sound_100_pontos is not None):
+            
+            print("[EVENTO] 100 pontos alcançados! Tocando áudio intermediário.")
+            sound_100_pontos.play()
+            audio_100_pontos_tocado = True # Impede que o som toque novamente nesta partida
 
         # --- Condições de Fim de Jogo---
         if game_mechanics.pontuacao >= 300:

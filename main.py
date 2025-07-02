@@ -27,7 +27,7 @@ def main():
     loading_screen = LoadingScreenToGame(
         images=["loading1.png", "loading2.png", "loading2.png", "loading3.png"],
         durations=[13.0, 18.0, 39.8, 88.9],
-        # durations = [1,1,1,1],
+        # durations = [0.3,0.3,0.3,0.3],
         audio_path=[AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, AUDIO_LOADING_4],
         initial_audio_delay=1.5
     )
@@ -43,6 +43,16 @@ def main():
     if os.path.exists(path_explicacao): # Verifica se o arquivo de áudio de explicação existe
         sound_explicacao = pygame.mixer.Sound(path_explicacao)  # Carrega o áudio de explicação do jogo
     
+    sound_vitoria = None  # Inicializa a variável de som de vitória como None
+    try:
+        from .settings import AUDIO_VITORIA # Importa o nome do arquivo de áudio de vitória do módulo settings
+        path_vitoria = os.path.join(PASTA_AUDIO, AUDIO_VITORIA) # Caminho para o áudio de vitória
+        if os.path.exists(path_vitoria):    # Verifica se o arquivo de áudio de vitória existe
+            sound_vitoria = pygame.mixer.Sound(path_vitoria)    # Carrega o áudio de vitória
+    except (ImportError, pygame.error) as e:    # Captura erros de importação ou carregamento do áudio
+        print(f"AVISO: Não foi possível carregar o áudio de vitória: {e}")  
+
+
     path_musica_fundo = os.path.join(PASTA_AUDIO, AUDIO_MUSICA_FUNDO)
     if os.path.exists(path_musica_fundo):   # Verifica se o arquivo de música de fundo existe
         pygame.mixer.music.load(path_musica_fundo)  # Carrega a música de fundo
@@ -57,19 +67,12 @@ def main():
         intro_sound.play() # Toca uma única vez
     else:
         print(f"AVISO: Áudio de introdução não encontrado em {path_intro_audio}")
-
-
-    # --- Máquina de Estados ---
-    game_state = "MENU"
-    game_mechanics_instance = None 
-    running = True
-    is_muted = False
-
     # --- Máquina de Estados ---    
     game_state = "MENU" # Estado inicial do jogo, começa no menu principal
     game_mechanics_instance = None  # Inicializa a instância de GameMechanics como None, será criada quando o jogo for iniciado
     running = True  # Variável de controle do loop principal do jogo
     is_muted = False    # Variável para controlar o estado de mudo do jogo
+    audio_vitoria_tocado = False  # Flag para indicar se o áudio de vitória foi tocado
 
     while running:  
         events = pygame.event.get() # Obtém todos os eventos da fila de eventos do Pygame
@@ -122,6 +125,7 @@ def main():
         screen.fill((0, 0, 0))
 
         if game_state == "MENU":    # Desenha o menu principal
+            audio_vitoria_tocado = False 
             menu.draw(screen)
         
         elif game_state == "LOADING":   # Desenha a tela de carregamento
@@ -151,6 +155,11 @@ def main():
                 game_state = "MENU"   # Se o resultado não for vitória ou derrota, volta para o menu principal
 
         elif game_state == "GAME_OVER_VITORIA": # Desenha a tela de fim de jogo para vitória
+            # Toca o som de vitória uma única vez
+            if not audio_vitoria_tocado and sound_vitoria:
+                sound_vitoria.play()    
+                audio_vitoria_tocado = True  # Marca que o áudio de vitória foi tocado
+
             end_screen.draw(screen)
             texto_titulo = font_fim_titulo.render("VITÓRIA!", True, BRANCO)
             texto_instrucao = font_fim_instrucao.render("Pressione ENTER para jogar de novo ou ESC para o menu", True, BRANCO)
