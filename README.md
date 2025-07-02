@@ -14,6 +14,18 @@ No jogo, você controla um ajudante do Papai Noel em uma oficina de presentes. S
 - **Pontuação** e condições de vitória/derrota.
 - **Sprites animados** e interface gráfica amigável.
 
+# 🚀 Como Clonar e Executar
+
+**Escolha um diretório e clone o repositório:**
+```bash
+git clone https://github.com/ThValverde/so_projeto_final.git
+```
+
+**Execute o jogo:
+```bash
+python3 so_projeto_final/run_game.py
+```
+
 # 🎮 COMO JOGAR - Oficina do Noel
 
 ## 🎯 **OBJETIVO**
