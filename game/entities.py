@@ -13,7 +13,6 @@ class Esteira(pygame.sprite.Sprite):
     Representa uma esteira animada que produz presentes.
     A animação alterna entre duas texturas para simular movimento.
     """
-    # AQUI ESTÁ A CORREÇÃO: Adicionamos o parâmetro 'size' ao __init__
     def __init__(self, position, size=(200, 200)):
         """
         Args:
