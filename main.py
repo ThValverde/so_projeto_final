@@ -6,10 +6,12 @@ import os
 
 # Imports relativos para funcionar com a execução de módulo (-m)
 from .settings import (LARGURA_TELA, ALTURA_TELA, FPS, PASTA_AUDIO, 
-                       AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, AUDIO_EXPLICACAO_JOGO, AUDIO_MUSICA_FUNDO)
+                       AUDIO_LOADING_1, AUDIO_LOADING_2, AUDIO_LOADING_3, 
+                       AUDIO_EXPLICACAO_JOGO, AUDIO_MUSICA_FUNDO)
 from .ui.menu import MainMenu
 from .ui.screens import LoadingScreenToGame, EndScreen, GameBackground
 from .game.main_game import game_loop 
+from .game.mechanics import GameMechanics
 
 def main():
     pygame.init()
@@ -32,6 +34,7 @@ def main():
     end_screen = EndScreen()
     game_background = GameBackground()
     
+
     # Carrega o áudio de explicação
     path_explicacao = os.path.join(PASTA_AUDIO, AUDIO_EXPLICACAO_JOGO)
     sound_explicacao = None
@@ -41,8 +44,11 @@ def main():
     # Carrega a música de fundo do jogo
     path_musica_fundo = os.path.join(PASTA_AUDIO, AUDIO_MUSICA_FUNDO)
 
+    game_mechanics = GameMechanics()
+
     # --- Máquina de Estados ---
     game_state = "MENU"
+    sistema_iniciado = False
     running = True
 
     while running:
@@ -91,22 +97,27 @@ def main():
 
         elif game_state == "EXPLAINING":
             game_background.draw(screen)
-            # Verifica se o som de explicação terminou
             if not pygame.mixer.get_busy():
                 game_state = "PLAYING"
+                # (ALTERADO) Inicia as threads e a música de fundo aqui
+                if not sistema_iniciado:
+                    game_mechanics.iniciar_sistema()
+                    sistema_iniciado = True
                 if os.path.exists(path_musica_fundo):
                     pygame.mixer.music.load(path_musica_fundo)
                     pygame.mixer.music.play(-1)
 
         elif game_state == "PLAYING":
-            # Chama o loop do jogo e captura o resultado
-            resultado = game_loop(screen, clock)
+            # (ALTERADO) Passa a instância 'game_mechanics' para o loop do jogo
+            resultado = game_loop(screen, clock, game_mechanics)
             pygame.mixer.music.stop()
             
-            # Transiciona para o estado correto com base no resultado
             if resultado in ['VITORIA', 'DERROTA']:
+                # Reinicia o estado do jogo para uma nova partida futura
+                # (Isto é opcional mas é uma boa prática)
+                game_mechanics.reiniciar_estado_jogo() 
                 game_state = "GAME_OVER_" + resultado
-            else: # Se saiu com ESC, o resultado é 'MENU'
+            else:
                 game_state = "MENU"
 
         elif game_state == "GAME_OVER_VITORIA":
@@ -120,4 +131,6 @@ def main():
         pygame.display.flip()
         clock.tick(FPS)
 
+    # (NOVO E CRUCIAL) Garante que as threads sejam paradas ao sair do jogo
+    game_mechanics.parar_sistema()
     pygame.quit()

@@ -11,7 +11,7 @@ from ..ui.screens import GameBackground
 from .entities import Esteira, Elfo, MesaDePresentes, Presente
 from .mechanics import GameMechanics
 
-def game_loop(screen, clock):
+def game_loop(screen, clock, game_mechanics):
     """
     Função que contém o loop principal do jogo completo com mecânicas de SO.
 
@@ -20,8 +20,8 @@ def game_loop(screen, clock):
         clock (pygame.time.Clock): O objeto de relógio do Pygame para controlar o FPS.
     """
     # --- Inicialização das Mecânicas de SO ---
-    game_mechanics = GameMechanics()
-    game_mechanics.iniciar_sistema()
+    # game_mechanics = GameMechanics()
+    # game_mechanics.iniciar_sistema()
     
     # --- Configuração dos Elementos do Jogo ---
     background = GameBackground()
@@ -391,5 +391,5 @@ def game_loop(screen, clock):
         clock.tick(FPS)
     
     # --- Limpeza ---
-    game_mechanics.parar_sistema()
-    print("Jogo finalizado!")
+    # game_mechanics.parar_sistema()
+    # print("Jogo finalizado!")
