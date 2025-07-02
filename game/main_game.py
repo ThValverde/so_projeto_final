@@ -86,7 +86,10 @@ def game_loop(screen, clock, game_mechanics):
                 elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     player.move("right")
                 elif event.key == pygame.K_SPACE:
+                    # ANALOGIA: Ação do jogador (consumidor) para interagir com o sistema
                     if player.position_index == 3:
+                        # Tenta colocar um item no buffer (recurso compartilhado).
+                        # A chamada 'adicionar_presente_mesa' é controlada pelo semáforo.
                         if player.presentes_carregados > 0:
                             if game_mechanics.adicionar_presente_mesa(None):
                                 mesa_sprite.adicionar_presente_visual()
@@ -126,8 +129,9 @@ def game_loop(screen, clock, game_mechanics):
             ultimo_spawn_presente = current_time
 
         all_sprites.update()    # Atualiza todos os sprites do jogo
-        
+        # ANÁLOGIA: Verifica se o processamento no buffer (Mesa) terminou.
         if mesa_sprite.verificar_processamento_concluido(): # Verifica se o processamento de um presente foi concluído
+            # Simula o consumo final do item, liberando uma vaga no semáforo e pontuando.
             if game_mechanics.elfo_tentar_coletar(player):  # Tenta coletar o presente processado pelo elfo
                 mesa_sprite.finalizar_processamento_visual()    # Finaliza o processamento visual do presente
                 mesa_sprite.ultimo_processamento = current_time   # Atualiza o tempo do último processamento

@@ -28,7 +28,7 @@ class MainMenu:
         
         # 1. Desenha a caixa preta de fundo
         pygame.draw.rect(screen, PRETO, title_box_rect, border_radius=5)
-        # 2. (NOVO) Desenha a borda por cima da caixa preta
+        # 2. Desenha a borda por cima da caixa preta
         pygame.draw.rect(screen, VERMELHO, title_box_rect, width=3, border_radius=5)
         
         # Desenha o texto do título
@@ -53,7 +53,7 @@ class MainMenu:
         
         # 1. Desenha a caixa preta
         pygame.draw.rect(screen, PRETO, subtitle2_box_rect, border_radius=5)
-        # 2. (NOVO) Desenha a borda
+        # 2. Desenha a borda
         pygame.draw.rect(screen, VERMELHO, subtitle2_box_rect, width=3, border_radius=5)
         
         screen.blit(subtitle2_text, subtitle2_rect)
