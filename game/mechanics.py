@@ -278,8 +278,10 @@ class GameMechanics:
     def verificar_derrota(self):
         # Evita a derrota no início do jogo quando a pontuação é 0
         if self.pontuacao <= 0: # Condição para evitar derrota logo no início
+            penalidade_total = 0
+            self.presentes_perdidos = 0    # Reseta o contador de presentes perdidos
+            # print("[AVISO] Jogo iniciado, não há derrota no início.")
             return False    # Se a pontuação for 0, não há derrota
-        
         penalidade_total = self.presentes_perdidos * 10 # Penalidade por presentes perdidos
         limite_derrota = self.pontuacao * 2 # Limite de derrota é o dobro da pontuação atual
         if self.pontuacao != 0:     # Condição para evitar derrota logo no início

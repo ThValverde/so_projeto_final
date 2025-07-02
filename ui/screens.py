@@ -1,9 +1,9 @@
 # ui/screens.py
 # Define as classes para as telas de carregamento e final.
 
-from ..settings import LARGURA_TELA, ALTURA_TELA, PASTA_IMAGENS
-import pygame
-import os
+from ..settings import LARGURA_TELA, ALTURA_TELA, PASTA_IMAGENS 
+import pygame   # Importa a biblioteca Pygame para manipulação de gráficos, som e eventos
+import os   # Importa a biblioteca os para manipulação de caminhos de arquivos e diretórios
 
 class MenuBackground:
     """Classe para o fundo do menu principal."""
