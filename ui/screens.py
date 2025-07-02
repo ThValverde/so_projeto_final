@@ -1,7 +1,7 @@
 # ui/screens.py
 # Define as classes para as telas de carregamento e final.
 
-from ..settings import LARGURA_TELA, ALTURA_TELA, PASTA_IMAGENS 
+from ..settings import LARGURA_TELA, ALTURA_TELA, PASTA_IMAGENS, FONTE_PATH, BRANCO, PRETO
 import pygame   # Importa a biblioteca Pygame para manipulação de gráficos, som e eventos
 import os   # Importa a biblioteca os para manipulação de caminhos de arquivos e diretórios
 
@@ -101,7 +101,7 @@ class LoadingScreenToGame:
                 target_index = i
                 break
 
-        # (LÓGICA DE ÁUDIO) Se o índice da imagem mudou, toca o novo som
+        # Se o índice da imagem mudou, toca o novo som
         if target_index != self.current_image_index:
             # Se for a primeira imagem, e o áudio dela já foi tocado pela lógica de atraso,
             # ou se não há som para essa imagem, não precisamos pará-lo ou tocá-lo novamente aqui.
@@ -167,3 +167,75 @@ class EndScreen:
         screen.blit(self.image, self.rect)
     
 
+
+class ReadmeScreen:
+    """
+    Uma tela que exibe o conteúdo de um arquivo de texto com funcionalidade de rolagem.
+    """
+    def __init__(self, filepath, font_size=18, line_height=22):
+        """
+        Inicializa a tela do Readme.
+        Args:
+            filepath (str): Caminho para o arquivo .txt a ser lido.
+            font_size (int): Tamanho da fonte para o texto.
+            line_height (int): Espaçamento vertical entre as linhas.
+        """
+        self.font = pygame.font.Font(FONTE_PATH, font_size)
+        self.line_height = line_height
+        self.lines_surfaces = []
+        self.scroll_y = 0  # Deslocamento vertical atual da rolagem
+        self.total_height = 0
+
+        # Carrega e renderiza cada linha do arquivo de texto
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                for line in lines:
+                    line_surface = self.font.render(line.strip(), True, BRANCO)
+                    self.lines_surfaces.append(line_surface)
+            # Calcula a altura total do texto para limitar a rolagem
+            self.total_height = len(self.lines_surfaces) * self.line_height
+        except FileNotFoundError:
+            print(f"AVISO: Arquivo do Readme não encontrado em {filepath}")
+            error_msg = "Arquivo README.txt não encontrado na raiz do projeto!"
+            error_surface = self.font.render(error_msg, True, (255, 100, 100))
+            self.lines_surfaces.append(error_surface)
+            self.total_height = self.line_height
+
+    def handle_event(self, event):
+        """Processa eventos de input para rolagem."""
+        scroll_speed = self.line_height * 2 # Rola 2 linhas por vez
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self.scroll_y -= scroll_speed
+            elif event.key == pygame.K_DOWN:
+                self.scroll_y += scroll_speed
+        elif event.type == pygame.MOUSEWHEEL:
+            self.scroll_y -= event.y * scroll_speed
+
+        # Limita a rolagem para não sair do texto
+        self.scroll_y = max(0, self.scroll_y) # Limite superior (não rolar acima do início)
+        max_scroll = self.total_height - ALTURA_TELA + 100 # Limite inferior
+        self.scroll_y = min(max_scroll, self.scroll_y) if max_scroll > 0 else 0
+
+    def draw(self, screen):
+        """Desenha o texto rolável na tela."""
+        screen.fill(PRETO)
+        
+        y_pos = 50 # Margem superior inicial
+
+        for line_surface in self.lines_surfaces:
+            # Posição de desenho é ajustada pela rolagem atual
+            draw_pos_y = y_pos - self.scroll_y
+            
+            # Otimização: Só desenha as linhas que estão visíveis
+            if draw_pos_y > -self.line_height and draw_pos_y < ALTURA_TELA:
+                screen.blit(line_surface, (50, draw_pos_y)) # Margem esquerda de 50px
+            
+            y_pos += self.line_height
+
+        # Instrução fixa de como navegar e sair
+        instrucao_font = pygame.font.Font(FONTE_PATH, 16)
+        instrucao_text = instrucao_font.render("Use as SETAS ou o SCROLL do mouse para navegar | Pressione ESC para voltar", True, (150, 150, 150))
+        screen.blit(instrucao_text, (20, ALTURA_TELA - 30))

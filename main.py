@@ -11,7 +11,7 @@ from .settings import (LARGURA_TELA, ALTURA_TELA, FPS, PASTA_AUDIO, AUDIO_START,
                        AUDIO_EXPLICACAO_JOGO, AUDIO_MUSICA_FUNDO,
                        FONTE_BOLD_PATH, FONTE_PATH, BRANCO, VERMELHO)
 from .ui.menu import MainMenu
-from .ui.screens import LoadingScreenToGame, EndScreen, GameBackground
+from .ui.screens import LoadingScreenToGame, EndScreen, GameBackground, ReadmeScreen
 from .game.main_game import game_loop   # Importa a função game_loop do módulo main_game, que contém a lógica principal do jogo
 from .game.mechanics import GameMechanics
 
@@ -33,7 +33,7 @@ def main():
     )
     end_screen = EndScreen()    # Cria uma instância da tela de fim de jogo
     game_background = GameBackground()  # Cria uma instância do fundo do jogo
-    
+    readme_screen = ReadmeScreen("README.md")
     # --- Carregamento de Recursos ---  
     font_fim_titulo = pygame.font.Font(FONTE_BOLD_PATH, 60)     # Fonte para o título da tela de fim de jogo
     font_fim_instrucao = pygame.font.Font(FONTE_PATH, 28)   # Fonte para as instruções da tela de fim de jogo
@@ -108,9 +108,15 @@ def main():
                             game_state = "LOADING"
                             loading_screen.start()
                         elif selected_text == "Readme":
-                            print("Lógica para a tela 'Readme' a ser implementada.")
+                            game_state = "README"
                         elif selected_text == "Sair":
                             running = False
+
+            elif game_state == "README":
+                readme_screen.handle_event(event) # Passa eventos para a tela de readme gerenciar a rolagem
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    game_state = "MENU" # ESC para voltar ao menu
+
             elif game_state == "LOADING":
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     print("Pulando carregamento...")
@@ -138,7 +144,10 @@ def main():
         if game_state == "MENU":    # Desenha o menu principal
             audio_vitoria_tocado = False 
             menu.draw(screen)
-        
+
+        elif game_state == "README":
+            readme_screen.draw(screen)
+
         elif game_state == "LOADING":   # Desenha a tela de carregamento
             loading_screen.update()
             loading_screen.draw(screen)
