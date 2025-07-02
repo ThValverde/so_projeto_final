@@ -1,27 +1,26 @@
-# settings.py
-# Este arquivo contém as configurações principais do jogo.
-
-# Configurações de PATH
-import os
-PASTA_RAIZ = os.path.dirname(os.path.abspath(__file__))  # Caminho absoluto da pasta raiz do projeto
-PASTA_ASSETS = os.path.join(PASTA_RAIZ, "assets")  # Pasta de assets
-PASTA_IMAGENS = os.path.join(PASTA_ASSETS, "images")  # Pasta de imagens
-PASTA_AUDIO = os.path.join(PASTA_ASSETS, "audio")  # Pasta de áudio
-PASTA_FONTS = os.path.join(PASTA_ASSETS, "fonts")  # Pasta de fontes
-
-FONTE_PATH = os.path.join(PASTA_FONTS, "pixel_operator", "PixelOperator.ttf")
+#   settings.py
+"""
+Arquivo de configuração central. Ele contém constantes globais para caminhos,
+cores, configurações de telas e outras variáveis que foram utilizadas em todo o projeto.
+Essas
+"""
+import os   # Importa o módulo os para manipulação de caminhos e diretórios
+# --- PATHS ---
+PASTA_RAIZ = os.path.dirname(os.path.abspath(__file__))     # Caminho absoluto da pasta raiz do projeto
+PASTA_ASSETS = os.path.join(PASTA_RAIZ, "assets")           # Pasta de assets
+PASTA_IMAGENS = os.path.join(PASTA_ASSETS, "images")        # Pasta de imagens
+PASTA_AUDIO = os.path.join(PASTA_ASSETS, "audio")           # Pasta de áudio
+PASTA_FONTS = os.path.join(PASTA_ASSETS, "fonts")           # Pasta de fontes
+# --- Caminho para as fontes utilizadas ---
+FONTE_PATH = os.path.join(PASTA_FONTS, "pixel_operator", "PixelOperator.ttf")           
 FONTE_BOLD_PATH = os.path.join(PASTA_FONTS, "pixel_operator", "PixelOperator-Bold.ttf")
-# Configurações de tela (serão usadas para o Pygame)
-
+# --- Configurações de tela (serão usadas para o Pygame) ---
 LARGURA_TELA = 800  # Largura da tela
 ALTURA_TELA = 600  # Altura da tela
 FPS = 60  # Frames por segundo
-
-
-# Configurações de Gameplay
+# --- Configurações de Gameplay ---
 VAGAS_NA_MESA = 3 # Número de vagas na mesa de jogo
-
-# Cores
+# --- Cores ---
 BRANCO = (255, 255, 255)  # Branco
 PRETO = (0, 0, 0)  # Preto
 VERMELHO = (255, 0, 0)  # Vermelho
@@ -33,9 +32,7 @@ CINZA = (128, 128, 128)  # Cinza
 LARANJA = (255, 165, 0)  # Laranja
 ROXO = (128, 0, 128)  # Roxo
 PRETO_TRANSPARENTE = (0, 0, 0, 128)  # Preto semi-transparente
-
-
-
+# --- Áudios ---
 AUDIO_LOADING_1 = "loading_sound_1.mp3"
 AUDIO_LOADING_2 = "loading_sound_2.mp3"
 AUDIO_LOADING_3 = "loading_sound_3.mp3"
