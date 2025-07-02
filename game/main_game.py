@@ -129,7 +129,7 @@ def game_loop(screen, clock, game_mechanics):
             ultimo_spawn_presente = current_time
 
         all_sprites.update()    # Atualiza todos os sprites do jogo
-        # ANÁLOGIA: Verifica se o processamento no buffer (Mesa) terminou.
+        # ANALOGIA: Verifica se o processamento no buffer (Mesa) terminou.
         if mesa_sprite.verificar_processamento_concluido(): # Verifica se o processamento de um presente foi concluído
             # Simula o consumo final do item, liberando uma vaga no semáforo e pontuando.
             if game_mechanics.elfo_tentar_coletar(player):  # Tenta coletar o presente processado pelo elfo
