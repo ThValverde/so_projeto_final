@@ -22,7 +22,7 @@ class LoadingScreenToGame:
     sincronizada com um áudio.
     """
 
-    def __init__(self, images, durations, audio_path=None):
+    def __init__(self, images, durations, audio_path=None, initial_audio_delay=0.0):
         """
         Args:
             images (list): Lista de nomes de arquivos de imagem (ex: ["loading1.png", "loading2.png, loading3.png"]).
@@ -56,24 +56,41 @@ class LoadingScreenToGame:
         self.current_image_index = -1
         self.start_time = None
         self.finished = True # Começa como finalizado, só fica ativo após chamar start()
+        
+        self.initial_audio_delay = initial_audio_delay # Armazena o atraso desejado
+        self.audio_start_time = 0 # Tempo em que o áudio deveria começar a tocar (start_time + delay)
+        self.first_audio_played = False # Flag para garantir que o primeiro áudio só toque uma vez
+
 
     def start(self):
         print("Iniciando a tela de carregamento...")
         self.start_time = pygame.time.get_ticks()
         self.current_image_index = -1
         self.finished = False
-
+        self.audio_start_time = self.start_time + (self.initial_audio_delay * 1000) # Convertendo segundos para milissegundos
+        self.first_audio_played = False # Reseta a flag para uma nova execução
+        
     def update(self):
         if self.finished or self.start_time is None:
             return
 
-        elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
+
+        current_time = pygame.time.get_ticks()
+        elapsed_time = (current_time - self.start_time) / 1000
+        # elapsed_time = (pygame.time.get_ticks() - self.start_time) / 1000
 
         if elapsed_time >= self.total_duration:
             self.finished = True
             pygame.mixer.stop() # Para qualquer som que ainda esteja tocando
             print("Tela de carregamento finalizada.")
             return
+        
+        if not self.first_audio_played and self.sounds and self.sounds[0]:
+            if current_time >= self.audio_start_time:
+                pygame.mixer.stop() # Para qualquer som anterior (como o do menu, se ele não parou)
+                self.sounds[0].play()
+                self.first_audio_played = True # Marca que o primeiro áudio já foi tocado
+
 
         # Descobre o índice da imagem atual
         target_index = 0
@@ -86,12 +103,30 @@ class LoadingScreenToGame:
 
         # (LÓGICA DE ÁUDIO) Se o índice da imagem mudou, toca o novo som
         if target_index != self.current_image_index:
-            self.current_image_index = target_index
-            # Toca o som correspondente, se ele existir
-            if self.current_image_index < len(self.sounds) and self.sounds[self.current_image_index]:
-                pygame.mixer.stop() # Para o som anterior
-                self.sounds[self.current_image_index].play()
+            # Se for a primeira imagem, e o áudio dela já foi tocado pela lógica de atraso,
+            # ou se não há som para essa imagem, não precisamos pará-lo ou tocá-lo novamente aqui.
+            # Caso contrário, para o som anterior para tocar o novo.
+            if self.current_image_index != -1: # Se não é a primeira atualização
+                pygame.mixer.stop() # Para o som da imagem anterior
 
+            self.current_image_index = target_index
+
+            # Toca o som correspondente, se ele existir e se não for o primeiro áudio já tocado
+            if self.current_image_index < len(self.sounds) and self.sounds[self.current_image_index]:
+                if self.current_image_index == 0: # Se for a primeira imagem
+                    if self.first_audio_played: # E o áudio dela JÁ foi tocado pelo atraso
+                        # Não faz nada, pois o áudio já está tocando ou já terminou
+                        pass
+                    else:
+                        # Isso não deveria acontecer se a lógica de atraso funcionar,
+                        # mas é um fallback para garantir que não toque antes do atraso.
+                        # Se chegar aqui para a imagem 0 e first_audio_played for False,
+                        # significa que o atraso ainda não disparou, então não toque.
+                        pass
+                else: # Para qualquer outra imagem (índice > 0)
+                    self.sounds[self.current_image_index].play()
+                    
+                    
     def draw(self, screen):
         if not self.finished and self.images and self.current_image_index != -1:
             current_image = self.images[self.current_image_index]

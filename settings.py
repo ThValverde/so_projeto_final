@@ -33,8 +33,10 @@ LARANJA = (255, 165, 0)  # Laranja
 ROXO = (128, 0, 128)  # Roxo
 PRETO_TRANSPARENTE = (0, 0, 0, 128)  # Preto semi-transparente
 # --- Áudios ---
+AUDIO_START = "bem vindos.mp3"  
 AUDIO_LOADING_1 = "loading_sound_1.mp3"
 AUDIO_LOADING_2 = "loading_sound_2.mp3"
 AUDIO_LOADING_3 = "loading_sound_3.mp3"
+AUDIO_LOADING_4 = "loading_sound_4.mp3"
 AUDIO_EXPLICACAO_JOGO = "explicacao_mecanicas.mp3"
 AUDIO_MUSICA_FUNDO = "christmas-dreams-jingle-bells-268299.mp3"
