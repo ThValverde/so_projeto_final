@@ -106,10 +106,10 @@ def game_loop(screen, clock, game_mechanics):
                 elif event.key == pygame.K_p:
                     if player.position_index == 3:
                         mesa_sprite.processar_presente()
-                elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
-                    mesa_sprite.ajustar_velocidade_processamento(max(500, mesa_sprite.tempo_processamento - 500))
-                elif event.key == pygame.K_MINUS:
-                    mesa_sprite.ajustar_velocidade_processamento(mesa_sprite.tempo_processamento + 500)
+                # elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
+                #     mesa_sprite.ajustar_velocidade_processamento(max(500, mesa_sprite.tempo_processamento - 500))
+                # elif event.key == pygame.K_MINUS:
+                #     mesa_sprite.ajustar_velocidade_processamento(mesa_sprite.tempo_processamento + 500)
                 elif event.key == pygame.K_F1:
                     debug_mode = not debug_mode
 
@@ -194,8 +194,9 @@ def game_loop(screen, clock, game_mechanics):
         instrucoes = [
             "=== MOVIMENTO ===", "SETAS/WASD: Mover",
             "=== AÇÕES ===", "ESPAÇO: Coletar/Entregar", "P: Forçar Processamento",
-            "=== CONTROLES MESA ===", "+/-: Vel. Processamento",
-            "F1: Debug Mode", "ESC: Sair"
+            # "=== CONTROLES MESA ===", "+/-: Vel. Processamento",
+            #"F1: Debug Mode", 
+            "ESC: Sair"
         ]
         
         for i, instrucao in enumerate(instrucoes):
