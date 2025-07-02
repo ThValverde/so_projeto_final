@@ -41,7 +41,7 @@ class MainMenu:
         
         # 1. Desenha a caixa preta
         pygame.draw.rect(screen, PRETO, subtitle_box_rect, border_radius=5)
-        # 2. (NOVO) Desenha a borda
+        # 2. Desenha a borda
         pygame.draw.rect(screen, VERMELHO, subtitle_box_rect, width=3, border_radius=5)
         
         screen.blit(subtitle_text, subtitle_rect)
