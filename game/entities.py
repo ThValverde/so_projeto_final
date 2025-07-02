@@ -11,9 +11,10 @@ import math # Importa math para cálculos matemáticos, como seno para animaçã
 
 class Esteira(pygame.sprite.Sprite):
     """
-    Representa o jogador.
-    ANALOGIA: Atua como o processo CONSUMIDOR, que retira itens das esteiras
-    e os coloca no buffer (Mesa). Também inicia o consumo do buffer (processamento).
+    Representa uma esteira que produz presentes.
+    ANALOGIA: Atua como o processo PRODUTOR, que gera itens (presentes)
+    e os coloca na fila (buffer). A esteira pode ser ligada ou desligada,
+    controlando se a animação dos presentes deve ocorrer ou não.
     """
     def __init__(self, position, size=(200, 200)):
         """
