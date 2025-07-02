@@ -220,25 +220,28 @@ class EscalonadorJogo:
 class GameMechanics:
     """
     Classe principal que integra todas as mecânicas de SO no jogo.
+    Nesta classe, gerenciamos as threads produtoras, o escalonador
+    de dificuldade e a comunicação entre as threads e o jogo principal.
     """
     
-    def __init__(self):
-        self.gerenciador_mesa = GerenciadorMesa()   # 
+    def __init__(self): # Inicializa o sistema de mecânicas do jogo
+        self.gerenciador_mesa = GerenciadorMesa()   # Gerenciador de mesa (recurso compartilhado)
         self.fila_presentes_visuais = Queue(maxsize=50)  # Comunicação thread-safe com jogo
-        
         # Criação dos produtores (uma thread por esteira)
-        self.produtores = [
+        self.produtores = [ # Lista de threads produtoras (esteiras)
             ProdutorPresentes(1, self.gerenciador_mesa, self.fila_presentes_visuais, 4.0),
             ProdutorPresentes(2, self.gerenciador_mesa, self.fila_presentes_visuais, 3.5),
             ProdutorPresentes(3, self.gerenciador_mesa, self.fila_presentes_visuais, 3.0)
-        ]
+        ]   # Lista de threads produtoras (esteiras) 
+        # O primeiro parâmetro é o ID da esteira, o segundo é o gerenciador de mesa,
+        # o terceiro é a fila de comunicação com o jogo e o quarto é o intervalo
+        # inicial de produção de presentes (em segundos).
         
         # Escalonador para aumentar dificuldade
-        self.escalonador = EscalonadorJogo(self.produtores)
-        
-        self.pontuacao = 0
-        self.presentes_perdidos = 0
-        self.iniciado = False
+        self.escalonador = EscalonadorJogo(self.produtores) # Lista de threads produtoras (esteiras)
+        self.pontuacao = 0  # Pontuação do jogo, começa em 0
+        self.presentes_perdidos = 0 # Contador de presentes perdidos (mesa cheia)
+        self.iniciado = False   # Flag para indicar se o sistema foi iniciado
         self.nivel_objetivo = 100 # para o próximo nível de dificuldade
         
     def iniciar_sistema(self):
@@ -247,67 +250,60 @@ class GameMechanics:
             print("[SISTEMA] Iniciando mecânicas de SO...")
             
             # Inicia threads produtoras
-            for produtor in self.produtores:
-                produtor.start()
-            
-            # Inicia escalonador
-            # self.escalonador.iniciar()
-            
-            self.iniciado = True
+            for produtor in self.produtores:    # Cada thread produtora representa uma esteira
+                produtor.start()    #   Inicia a thread produtora
+            self.iniciado = True    #   Marca o sistema como iniciado
             print("[SISTEMA] Todas as mecânicas iniciadas!")
     
-    def parar_sistema(self):
+    def parar_sistema(self):    
         """Para todas as threads do sistema."""
         if self.iniciado:
             print("[SISTEMA] Parando mecânicas...")
             
             # Para produtores
-            for produtor in self.produtores:
-                produtor.parar()
-            
-            # Para escalonador
-            # self.escalonador.parar()
-            
-            self.iniciado = False
-            print("[SISTEMA] Sistema parado!")
-    # (NOVO) Método para verificar e aplicar o level up
-    def verificar_levelup(self, elfo):
-        if self.pontuacao >= self.nivel_objetivo:
-            self.escalonador.aumentar_nivel()
-            elfo.aumentar_capacidade(10)
-            # Define o próximo objetivo de pontuação
-            self.nivel_objetivo += 100
+            for produtor in self.produtores:    # Para cada thread produtora
+                produtor.parar()    #   Chama o método parar() da thread produtora
 
-    # (NOVO) Método para verificar a condição de derrota
+            self.iniciado = False   # Marca o sistema como não iniciado
+            print("[SISTEMA] Sistema parado!")  
+    # Método para verificar se o elfo pode subir de nível
+    def verificar_levelup(self, elfo):  # Elfo é uma instância da classe Elfo
+        if self.pontuacao >= self.nivel_objetivo:   # Verifica se a pontuação atingiu o objetivo do nível
+            self.escalonador.aumentar_nivel()   # Aumenta o nível de dificuldade
+            elfo.aumentar_capacidade(10)    # Aumenta a capacidade do elfo em 10
+            # Define o próximo objetivo de pontuação
+            self.nivel_objetivo += 100  # Aumenta o objetivo de pontuação em 100 para o próximo nível
+
+    # Método para verificar a condição de derrota
     def verificar_derrota(self):
         # Evita a derrota no início do jogo quando a pontuação é 0
-        if self.pontuacao <= 0:
-            return False
+        if self.pontuacao <= 0: # Condição para evitar derrota logo no início
+            return False    # Se a pontuação for 0, não há derrota
         
-        penalidade_total = self.presentes_perdidos * 10
-        limite_derrota = self.pontuacao * 2
-        if self.pontuacao != 0:     # condição para evitar derrota logo no início
-            if penalidade_total >= limite_derrota:
-                return True
-            return False
+        penalidade_total = self.presentes_perdidos * 10 # Penalidade por presentes perdidos
+        limite_derrota = self.pontuacao * 2 # Limite de derrota é o dobro da pontuação atual
+        if self.pontuacao != 0:     # Condição para evitar derrota logo no início
+            if penalidade_total >= limite_derrota:  # Se a penalidade total for maior ou igual ao limite de derrota
+                return True   # Retorna True se a penalidade total for maior ou igual ao limite de derrota
+            return False    # Se a penalidade total for menor que o limite de derrota, não há derrota
         else:
-            return False
+            return False    # Se a pontuação for 0, não há derrota
     def processar_novos_presentes(self):
         """
         Processa presentes criados pelas threads produtoras.
         Deve ser chamado no loop principal do jogo.
         """
-        presentes_processados = []
+        presentes_processados = []  # Lista para armazenar os presentes processados
         
         # Processa todos os presentes na fila
-        while not self.fila_presentes_visuais.empty():
+        while not self.fila_presentes_visuais.empty():  # Enquanto houver presentes na fila
             try:
-                presente_data = self.fila_presentes_visuais.get_nowait()
-                presentes_processados.append(presente_data)
+                presente_data = self.fila_presentes_visuais.get_nowait() # Tenta obter um presente da fila sem bloquear
+                presentes_processados.append(presente_data) # Adiciona o presente processado à lista
             except:
                 break
         
-        return presentes_processados
+        return presentes_processados    # Lista de presentes processados
     
     def elfo_tentar_coletar(self, elfo):
         """
@@ -319,26 +315,26 @@ class GameMechanics:
             # Se não está vazia, removemos o item (não importa qual seja).
             self.gerenciador_mesa.remover_presente()
             # E então, garantidamente, adicionamos a pontuação.
-            self.pontuacao += 10
-            self.verificar_levelup(elfo)
-            return True
+            self.pontuacao += 10    # Incrementa a pontuação em 10
+            self.verificar_levelup(elfo) # Verifica se o elfo pode subir de nível
+            return True   # Retorna True se conseguiu coletar um presente
         # Se a mesa já estava vazia, não faz nada.
-        return False
+        return False    # Retorna False se não conseguiu coletar um presente
     
     def adicionar_presente_mesa(self, presente_data):
         """
         Adiciona presente à mesa (quando elfo entrega).
         Retorna True se conseguiu, False se mesa cheia.
         """
-        sucesso = self.gerenciador_mesa.adicionar_presente(presente_data)
-        if not sucesso:
-            self.presentes_perdidos += 1
-            print("[PENALIDADE] Presente perdido! Mesa cheia.")
-        return sucesso
+        sucesso = self.gerenciador_mesa.adicionar_presente(presente_data)   # Tenta adicionar o presente à mesa
+        if not sucesso:   # Se não conseguiu adicionar (mesa cheia)
+            self.presentes_perdidos += 1    # Incrementa o contador de presentes perdidos
+            print("[PENALIDADE] Presente perdido! Mesa cheia.") 
+        return sucesso  # Retorna True se conseguiu adicionar, False se mesa cheia
     
-    def get_estatisticas(self):
+    def get_estatisticas(self): # Método para obter estatísticas do jogo
         """Retorna estatísticas do jogo."""
-        mesa_status = self.gerenciador_mesa.get_status()
+        mesa_status = self.gerenciador_mesa.get_status() # Obtém o status atual da mesa
         return {
             'pontuacao': self.pontuacao,
             'presentes_perdidos': self.presentes_perdidos,
