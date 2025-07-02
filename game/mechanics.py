@@ -310,3 +310,5 @@ class GameMechanics:
             'mesa_status': mesa_status,
             'produtores_ativos': sum(1 for p in self.produtores if p.is_alive())
         }
+    
+

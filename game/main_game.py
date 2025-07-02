@@ -160,11 +160,11 @@ def game_loop(screen, clock, game_mechanics):
                             print("Nenhum presente para processar ou já processando!")
                 
                 # Alternar processamento automático (tecla T)
-                elif event.key == pygame.K_t:
-                    if mesa_sprite.processamento_ativo:
-                        mesa_sprite.desativar_processamento_automatico()
-                    else:
-                        mesa_sprite.ativar_processamento_automatico()
+                # elif event.key == pygame.K_t:
+                #     if mesa_sprite.processamento_ativo:
+                #         mesa_sprite.desativar_processamento_automatico()
+                #     else:
+                #         mesa_sprite.ativar_processamento_automatico()
                 
                 # Acelerar processamento (tecla +)
                 elif event.key == pygame.K_PLUS or event.key == pygame.K_EQUALS:
@@ -331,10 +331,10 @@ def game_loop(screen, clock, game_mechanics):
             "SETAS/WASD: Mover",
             "=== AÇÕES ===", 
             "ESPAÇO: Coletar/Entregar",
-            "C: Processar da Mesa",
+            #"C: Processar da Mesa",
             "P: Forçar Processamento",
             "=== CONTROLES MESA ===",
-            "T: Toggle Auto-Proc",
+            #"T: Toggle Auto-Proc",
             "+/-: Vel. Processamento",
             "F1: Debug Mode",
             "ESC: Sair"
