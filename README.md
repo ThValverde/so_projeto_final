@@ -16,7 +16,7 @@ No jogo, você controla um ajudante do Papai Noel em uma oficina de presentes. S
 
 # 🚀 Como Clonar e Executar
 
-**Instale as dependências
+**Instale as dependências**
 ```bash
 pip install pygame
 ```
