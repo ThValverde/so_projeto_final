@@ -111,7 +111,18 @@ def main():
                             print("Lógica para a tela 'Readme' a ser implementada.")
                         elif selected_text == "Sair":
                             running = False
+            elif game_state == "LOADING":
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    print("Pulando carregamento...")
+                    loading_screen.finished = True
+                    pygame.mixer.stop() 
             
+            elif game_state == "EXPLAINING":
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    print("Pulando explicação...")
+                    if sound_explicacao:
+                        sound_explicacao.stop()
+
             elif game_state in ["GAME_OVER_VITORIA", "GAME_OVER_DERROTA"]:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:

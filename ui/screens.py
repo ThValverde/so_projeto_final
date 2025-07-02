@@ -131,6 +131,16 @@ class LoadingScreenToGame:
         if not self.finished and self.images and self.current_image_index != -1:
             current_image = self.images[self.current_image_index]
             screen.blit(current_image, (0, 0))
+            try:
+                from ..settings import FONTE_PATH, BRANCO
+                font_pular = pygame.font.Font(FONTE_PATH, 18)
+                texto_pular = font_pular.render("Pressione ESPAÇO para pular", True, BRANCO)
+                # Posiciona no canto inferior direito
+                pos_x = LARGURA_TELA - texto_pular.get_width() - 20
+                pos_y = ALTURA_TELA - texto_pular.get_height() - 20
+                screen.blit(texto_pular, (pos_x, pos_y))
+            except:
+                pass # Se falhar, simplesmente não desenha o texto
 
 class GameBackground:
     """Classe para o fundo do jogo."""
