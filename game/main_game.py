@@ -1,9 +1,10 @@
 # game/main_game.py
-# Contém a lógica principal do gameplay com mecânicas completas de SO.
+# Contém a função 'game_loop' que implementa o loop principal do jogo completo com mecânicas de SO.
+# Responsável por receber input do jogador, atualizar o estado do jogo, renderizar tudo na tela.
 
-import pygame
-import sys
-import random
+import pygame   # Importa o Pygame para manipulação de gráficos e eventos
+import sys      # Importa o sys para manipulação de sistema e saída do programa
+import random       # Importa o random para gerar números aleatórios, como a escolha de esteiras para spawn de presentes
 
 # Importa as classes e configurações necessárias
 from ..settings import LARGURA_TELA, ALTURA_TELA, FPS, BRANCO, PRETO, VERDE_ESCURO, VERMELHO, PRETO_TRANSPARENTE
@@ -22,61 +23,61 @@ def game_loop(screen, clock, game_mechanics):
     """
     
     # --- Configuração dos Elementos do Jogo ---
-    background = GameBackground()
-    all_sprites = pygame.sprite.Group()
-    presentes_sprites = pygame.sprite.Group()
+    background = GameBackground()   #   Cria o fundo do jogo
+    all_sprites = pygame.sprite.Group() #   Agrupa todos os sprites do jogo para atualização e renderização
+    presentes_sprites = pygame.sprite.Group()   # Agrupa os presentes que estão caindo
     
-    esteiras = [
+    esteiras = [    #   Cria as esteiras onde os presentes vão cair
         Esteira(position=(-60 + (LARGURA_TELA - 560) / 2, ALTURA_TELA/4), size=(200, 60)),
         Esteira(position=(-60 + (LARGURA_TELA - 560) / 2 + 180, ALTURA_TELA/4), size=(200, 60)),
         Esteira(position=(-60 + (LARGURA_TELA - 560) / 2 + 360, ALTURA_TELA/4), size=(200, 60))
     ]
-    all_sprites.add(esteiras)
-
+    all_sprites.add(esteiras)   # Adiciona as esteiras ao grupo de sprites
+    # Cria a mesa de presentes onde o elfo vai entregar os presentes
     mesa_sprite = MesaDePresentes(position=(-60 + (LARGURA_TELA - 560) / 2 + 570, ALTURA_TELA * 0.8))
-    all_sprites.add(mesa_sprite)
-
-    y_pos_elfo = ALTURA_TELA * 0.85
+    all_sprites.add(mesa_sprite)    #   Adiciona a mesa ao grupo de sprites
+    y_pos_elfo = ALTURA_TELA * 0.85 # Posição vertical do elfo, um pouco acima da mesa
     POSICOES_ELFO = [
         (esteiras[0].rect.centerx, y_pos_elfo),
         (esteiras[1].rect.centerx, y_pos_elfo),
         (esteiras[2].rect.centerx, y_pos_elfo),
         (mesa_sprite.rect.centerx, y_pos_elfo)
     ]
-    player = Elfo(positions=POSICOES_ELFO, start_index=0)
-    all_sprites.add(player)
-    
-    debug_mode = False
-    
+    player = Elfo(positions=POSICOES_ELFO, start_index=0)   # Cria o elfo jogador com as posições definidas
+    all_sprites.add(player) #   Adiciona o elfo ao grupo de sprites
+    debug_mode = False  # Modo de depuração, pode ser ativado/desativado com F1
+    # --- Configuração da Fonte ---
     try:
-        from ..settings import FONTE_PATH
-        font = pygame.font.Font(FONTE_PATH, 24)
-        font_small = pygame.font.Font(FONTE_PATH, 18)
+        from ..settings import FONTE_PATH   #   Importa o caminho da fonte definida nas configurações
+        font = pygame.font.Font(FONTE_PATH, 24) # Cria a fonte principal do jogo
+        font_small = pygame.font.Font(FONTE_PATH, 18)   # Cria uma fonte menor para o HUD
     except:
-        font = pygame.font.Font(None, 24)
-        font_small = pygame.font.Font(None, 18)
+        font = pygame.font.Font(None, 24)   # Fonte padrão do Pygame se não for possível carregar a fonte personalizada
+        font_small = pygame.font.Font(None, 18) # Fonte menor padrão do Pygame
 
-    popup_ativo = False
-    popup_surface = None
-    popup_rect = None
-    popup_duracao = 1500
-    popup_tempo_final = 0
+    # --- Variáveis de Controle do Jogo ---
+    popup_ativo = False # Flag para controlar se o popup de mensagem está ativo
+    popup_surface = None    # Superfície do popup que será desenhada na tela
+    popup_rect = None   # Retângulo que define a posição do popup
+    popup_duracao = 1500    # Duração do popup em milissegundos (1.5 segundos)
+    popup_tempo_final = 0   # Tempo final para o popup desaparecer
     
-    running = True
-    ultimo_spawn_presente = pygame.time.get_ticks()
+    running = True  # Variável de controle do loop principal do jogo
+    ultimo_spawn_presente = pygame.time.get_ticks() # Tempo do último spawn de presente
     
     while running:
-        current_time = pygame.time.get_ticks()
+        current_time = pygame.time.get_ticks()  # Obtém o tempo atual em milissegundos
         
-        if popup_ativo and current_time > popup_tempo_final:
-            popup_ativo = False
-            popup_surface = None
+        if popup_ativo and current_time > popup_tempo_final:    # Verifica se o popup está ativo e se o tempo final foi alcançado
+            popup_ativo = False # Desativa o popup
+            popup_surface = None    # Limpa a superfície do popup
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+        for event in pygame.event.get():    # Processa todos os eventos do Pygame
+            if event.type == pygame.QUIT:   # Se o evento for de saída (fechar a janela)
+                pygame.quit()   # Encerra o Pygame
+                sys.exit()  # Sai do programa
             
+            # Verifica se uma tecla foi pressionada
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 'MENU'
@@ -113,27 +114,27 @@ def game_loop(screen, clock, game_mechanics):
                 elif event.key == pygame.K_F1:
                     debug_mode = not debug_mode
 
+        # --- Atualização dos Sprites ---
+        # Atualiza a posição do elfo com base na posição atual
         intervalo_atual = game_mechanics.escalonador.taxa_spawn_atual
         if current_time - ultimo_spawn_presente > intervalo_atual and len(presentes_sprites) < 6:
-            esteira_escolhida = random.choice(esteiras)
-            velocidade_atual = game_mechanics.escalonador.velocidade_queda_atual
-            novo_presente = Presente(esteira_escolhida, game_mechanics, fall_speed=velocidade_atual)
-            presentes_sprites.add(novo_presente)
-            all_sprites.add(novo_presente)
+            esteira_escolhida = random.choice(esteiras) # Escolhe aleatoriamente uma esteira para spawnar o presente
+            velocidade_atual = game_mechanics.escalonador.velocidade_queda_atual    # Define a velocidade de queda do presente
+            novo_presente = Presente(esteira_escolhida, game_mechanics, fall_speed=velocidade_atual)    # Cria um novo presente com a esteira escolhida e a velocidade de queda atual
+            presentes_sprites.add(novo_presente)    # Adiciona o novo presente ao grupo de presentes
+            all_sprites.add(novo_presente)  # Adiciona o novo presente ao grupo de sprites
             ultimo_spawn_presente = current_time
 
-        all_sprites.update()
+        all_sprites.update()    # Atualiza todos os sprites do jogo
         
-        if mesa_sprite.verificar_processamento_concluido():
-            if game_mechanics.elfo_tentar_coletar(player):
-                mesa_sprite.finalizar_processamento_visual()
-                mesa_sprite.ultimo_processamento = current_time
+        if mesa_sprite.verificar_processamento_concluido(): # Verifica se o processamento de um presente foi concluído
+            if game_mechanics.elfo_tentar_coletar(player):  # Tenta coletar o presente processado pelo elfo
+                mesa_sprite.finalizar_processamento_visual()    # Finaliza o processamento visual do presente
+                mesa_sprite.ultimo_processamento = current_time   # Atualiza o tempo do último processamento
             else:
-                mesa_sprite.finalizar_processamento_visual()
-        
-        # --- (BLOCO PROBLEMÁTICO REMOVIDO DAQUI) ---
+                mesa_sprite.finalizar_processamento_visual() # Finaliza o processamento visual do presente mesmo se o elfo não coletou    
 
-        # --- Condições de Fim de Jogo (ÚNICA VERIFICAÇÃO CORRETA) ---
+        # --- Condições de Fim de Jogo---
         if game_mechanics.pontuacao >= 300:
             print("="*30)
             print("VITÓRIA! Você atingiu 300 pontos!")
@@ -204,7 +205,7 @@ def game_loop(screen, clock, game_mechanics):
             screen.blit(texto, (LARGURA_TELA - 220, 10 + i * 18))
         
         if debug_mode:
-            # ... (código de debug) ...
+            # codigo debug, não implementado
             pass
 
         pygame.display.flip()
